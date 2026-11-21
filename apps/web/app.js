@@ -46,6 +46,9 @@ async function initializeDashboard() {
 
     // 4. Load alerts
     loadAlerts();
+
+    // 5. Load work orders
+    loadWorkOrders();
   } catch (err) {
     console.error("Could not initialize dashboard:", err);
     logTerminal(`[ERROR] Backend connection failed: ${err.message}. Retrying...`);
@@ -187,14 +190,26 @@ function renderZonesTable(zones) {
 }
 
 function populateSimulatorZones(zones) {
-  if (!simZoneSelect) return;
-  simZoneSelect.innerHTML = "";
-  zones.forEach(z => {
-    const opt = document.createElement("option");
-    opt.value = z.zone_id;
-    opt.textContent = `${z.name} (${z.building_name} - Fl. ${z.floor_number})`;
-    simZoneSelect.appendChild(opt);
-  });
+  if (simZoneSelect) {
+    simZoneSelect.innerHTML = "";
+    zones.forEach(z => {
+      const opt = document.createElement("option");
+      opt.value = z.zone_id;
+      opt.textContent = `${z.name} (${z.building_name} - Fl. ${z.floor_number})`;
+      simZoneSelect.appendChild(opt);
+    });
+  }
+
+  const woZoneSelect = document.getElementById("woZoneSelect");
+  if (woZoneSelect) {
+    woZoneSelect.innerHTML = '<option value="">All Zones / Campus-wide</option>';
+    zones.forEach(z => {
+      const opt = document.createElement("option");
+      opt.value = z.zone_id;
+      opt.textContent = `${z.name} (${z.building_name})`;
+      woZoneSelect.appendChild(opt);
+    });
+  }
 }
 
 function logTerminal(msg) {
@@ -423,6 +438,151 @@ window.resolveAlert = async function(alertId) {
 const btnRefreshAlerts = document.getElementById("btnRefreshAlerts");
 if (btnRefreshAlerts) {
   btnRefreshAlerts.addEventListener("click", loadAlerts);
+}
+
+// Work Orders & Interventions Dispatch
+async function loadWorkOrders() {
+  if (!currentSiteId) return;
+  const tbody = document.getElementById("workOrdersTableBody");
+  try {
+    const res = await fetch(`${API_BASE}/work-orders/site/${currentSiteId}`);
+    if (!res.ok) return;
+    const orders = await res.json();
+
+    if (!tbody) return;
+    if (orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500 font-mono">No active work orders. Everything operating normally.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+      let prioBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">${o.priority}</span>`;
+      if (o.priority === "URGENT") prioBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">URGENT</span>`;
+      if (o.priority === "HIGH") prioBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">HIGH</span>`;
+
+      let statusBadge = `<span class="text-amber-400 font-medium">${o.status}</span>`;
+      if (o.status === "IN_PROGRESS") statusBadge = `<span class="text-blue-400 font-medium">IN PROGRESS</span>`;
+      if (o.status === "RESOLVED") statusBadge = `<span class="text-emerald-400 font-medium">RESOLVED</span>`;
+
+      let actionBtn = "";
+      if (o.status === "OPEN" || o.status === "ASSIGNED") {
+        actionBtn = `<button onclick="startWorkOrder('${o.id}')" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 px-2 py-1 rounded text-[10px] font-semibold">Start</button>`;
+      } else if (o.status === "IN_PROGRESS") {
+        actionBtn = `<button onclick="resolveWorkOrderModal('${o.id}')" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded text-[10px] font-semibold">Complete</button>`;
+      } else {
+        actionBtn = `<span class="text-slate-500 text-[10px]">Closed</span>`;
+      }
+
+      return `
+        <tr class="hover:bg-slate-800/30 text-xs">
+          <td class="py-2.5 px-3 font-mono">${prioBadge}</td>
+          <td class="py-2.5 px-3 font-medium text-slate-200">
+            <div>${escapeHtml(o.title)}</div>
+            <div class="text-[10px] text-slate-400">${escapeHtml(o.description.substring(0, 50))}...</div>
+          </td>
+          <td class="py-2.5 px-3 text-slate-300">${escapeHtml(o.assigned_to_name || 'Unassigned')}</td>
+          <td class="py-2.5 px-3 font-mono">${statusBadge}</td>
+          <td class="py-2.5 px-3 text-right">${actionBtn}</td>
+        </tr>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error("Failed to load work orders:", err);
+  }
+}
+
+window.startWorkOrder = async function(orderId) {
+  try {
+    await fetch(`${API_BASE}/work-orders/${orderId}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "IN_PROGRESS",
+        actor_name: "Staff Tech",
+        notes: "Work started on site."
+      })
+    });
+    loadWorkOrders();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+window.resolveWorkOrderModal = async function(orderId) {
+  const notes = prompt("Enter completion notes and actions taken:", "Air purge completed, mechanical damper calibrated.");
+  if (!notes) return;
+  try {
+    // Record intervention
+    await fetch(`${API_BASE}/work-orders/${orderId}/interventions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        intervention_type: "HVAC_VENTILATION_ADJUSTMENT",
+        description: notes,
+        performed_by: "Staff Tech",
+        site_id: currentSiteId
+      })
+    });
+
+    // Resolve order
+    await fetch(`${API_BASE}/work-orders/${orderId}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "RESOLVED",
+        actor_name: "Staff Tech",
+        completion_notes: notes
+      })
+    });
+    loadWorkOrders();
+    loadAlerts();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+// Create Work Order Form Handler
+const createWorkOrderForm = document.getElementById("createWorkOrderForm");
+if (createWorkOrderForm) {
+  createWorkOrderForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentSiteId) return;
+
+    const zoneId = document.getElementById("woZoneSelect")?.value;
+    const title = document.getElementById("woTitleInput")?.value;
+    const description = document.getElementById("woDescInput")?.value;
+    const priority = document.getElementById("woPrioritySelect")?.value;
+    const assignee = document.getElementById("woAssigneeInput")?.value;
+
+    try {
+      const res = await fetch(`${API_BASE}/work-orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          site_id: currentSiteId,
+          organization_id: currentSite.organization_id || currentSiteId,
+          zone_id: zoneId || null,
+          title: title,
+          description: description,
+          priority: priority,
+          assigned_to_name: assignee,
+          actor_name: "Facility Manager"
+        })
+      });
+      if (res.ok) {
+        document.getElementById("woTitleInput").value = "";
+        document.getElementById("woDescInput").value = "";
+        loadWorkOrders();
+      }
+    } catch (err) {
+      console.error("Failed to create work order:", err);
+    }
+  });
+}
+
+const btnRefreshWorkOrders = document.getElementById("btnRefreshWorkOrders");
+if (btnRefreshWorkOrders) {
+  btnRefreshWorkOrders.addEventListener("click", loadWorkOrders);
 }
 
 function escapeHtml(str) {
