@@ -1,462 +1,620 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cleair Institutional | Air Quality Operations & Intelligence</title>
+  <title>UAQA | Institutional Environmental Intelligence Platform</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0F766E">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
-  <!-- Top Navigation & Institution Bar -->
-  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-lg border border-teal-500/30">
-          C
+<body>
+  <!-- Overlay for Mobile Sidebar -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Collapsible Enterprise Sidebar -->
+    <aside id="appSidebar" class="app-sidebar">
+      <!-- Sidebar Brand & Toggle -->
+      <div class="sidebar-brand" style="height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle);">
+        <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+          <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--accent-primary); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0;">
+            U
+          </div>
+          <div class="sidebar-label" style="line-height: 1.2;">
+            <div style="font-weight: 700; font-size: 14px; letter-spacing: -0.01em; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>UAQA Ops</span>
+              <span class="badge badge-healthy" style="font-size: 9px; padding: 1px 5px;">PILOT</span>
+            </div>
+            <div class="sidebar-org-info" style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" id="sidebarOrgSummary">
+              St. Xavier's Model School
+            </div>
+          </div>
         </div>
+
+        <button id="btnToggleSidebar" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center;" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav style="flex: 1; padding: 12px 0; overflow-y: auto;">
+        <div class="sidebar-section-header" style="padding: 6px 18px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+          Operations Center
+        </div>
+
+        <a class="nav-item active" data-view="facility">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span class="sidebar-label">Campus Overview</span>
+        </a>
+
+        <a class="nav-item" data-view="zones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="sidebar-label">Buildings & Zones</span>
+        </a>
+
+        <a class="nav-item" data-view="alerts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="sidebar-label">Operational Alerts</span>
+          <span id="alertsBadge" class="sidebar-badge badge badge-warning" style="margin-left: auto; display: none;">0</span>
+        </a>
+
+        <a class="nav-item" data-view="workorders">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="sidebar-label">Work Orders & Actions</span>
+        </a>
+
+        <div class="sidebar-section-header" style="padding: 14px 18px 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+          Environmental Intelligence
+        </div>
+
+        <a class="nav-item" data-view="telemetry">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><activity x1="2" y1="12" x2="6" y2="12"/><line x1="6" y1="12" x2="10" y2="6"/><line x1="10" y1="6" x2="14" y2="18"/><line x1="14" y1="18" x2="18" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+          <span class="sidebar-label">IoT Sensor Feed</span>
+        </a>
+
+        <a class="nav-item" data-view="outdoor">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          <span class="sidebar-label">Mumbai Ambient Air</span>
+        </a>
+
+        <a class="nav-item" data-view="chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="sidebar-label">AI Explainer & Insights</span>
+        </a>
+
+        <a class="nav-item" data-view="privacy">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span class="sidebar-label">Audit, Reports & Export</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div style="padding: 14px 16px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-secondary);">
+            FM
+          </div>
+          <div class="sidebar-label" style="font-size: 11px; line-height: 1.2;">
+            <div style="font-weight: 600; color: var(--text-primary);">Facility Manager</div>
+            <div style="color: var(--text-muted); font-size: 10px;">Operator (Role: ADMIN)</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="app-main">
+      <!-- Enterprise Topbar -->
+      <header class="app-topbar">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <!-- Mobile Menu Trigger -->
+          <button id="btnMobileMenu" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); display: none; padding: 4px;" class="show-mobile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+
+          <!-- Campus / Site Badge -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);" id="topbarSiteTitle">St. Xavier's Academic Complex</span>
+            <span class="badge badge-neutral" style="font-size: 10px; font-weight: 500;" id="topbarCityBadge">Mumbai Metropolitan Region</span>
+          </div>
+        </div>
+
+        <!-- Topbar Controls -->
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <!-- Freshness Status Indicator -->
+          <div style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--bg-surface-subtle); font-size: 11px;">
+            <span class="badge-dot" style="background-color: var(--status-healthy-dot);" id="topbarSensorDot"></span>
+            <span style="color: var(--text-muted);">IoT Telemetry:</span>
+            <span style="font-weight: 600; color: var(--status-healthy-text);" id="headerSensorStatus">ONLINE</span>
+          </div>
+
+          <!-- Dark / Light Theme Toggle -->
+          <button id="btnThemeToggle" class="btn-secondary" style="padding: 6px 10px;" title="Toggle Color Theme">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+
+          <!-- Refresh Button -->
+          <button id="btnRefreshTelemetry" class="btn-secondary" style="gap: 5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span>Sync</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Main View Container -->
+      <main style="flex: 1; padding: 24px; max-width: 1360px; width: 100%; margin: 0 auto;">
+
+        <!-- ================= VIEW 1: CAMPUS OVERVIEW DASHBOARD ================= -->
+        <section id="view-facility" class="view-panel space-y-6">
+          <!-- Institutional Context Header -->
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 20px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);" id="siteCampusLocation">
+                Mumbai Metropolitan Region • South Mumbai Campus
+              </div>
+              <h1 style="font-size: 24px; font-weight: 800; margin: 4px 0 2px; color: var(--text-primary); letter-spacing: -0.02em;">
+                Campus Environmental Intelligence Overview
+              </h1>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+                Deterministic indoor air operations • Threshold benchmark PM2.5 ≤ 60 µg/m³ • CO2 ≤ 1000 ppm
+              </p>
+            </div>
+
+            <!-- Provenance & Sync Status -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge badge-healthy" id="badgeProvenanceTag">MEASURED & SIMULATED</span>
+              <span style="font-size: 11px; color: var(--text-muted);" id="labelLastSyncTime">Synced seconds ago</span>
+            </div>
+          </div>
+
+          <!-- Key Environmental KPI Cards Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <!-- KPI 1: Campus Avg PM2.5 -->
+            <div class="card-enterprise kpi-card">
+              <div>
+                <span class="kpi-label">Indoor PM2.5 (Campus Mean)</span>
+                <div class="kpi-value num-tabular" id="campusAvgPM25">
+                  38.4 <span class="kpi-unit">µg/m³</span>
+                </div>
+              </div>
+              <div class="kpi-subtext">
+                <span class="badge badge-healthy">Optimal</span>
+                <span style="color: var(--text-muted); font-size: 10px;">Target ≤ 60 µg/m³</span>
+              </div>
+            </div>
+
+            <!-- KPI 2: Campus Avg CO2 -->
+            <div class="card-enterprise kpi-card">
+              <div>
+                <span class="kpi-label">Indoor CO2 (Ventilation)</span>
+                <div class="kpi-value num-tabular" id="campusAvgCO2">
+                  720 <span class="kpi-unit">ppm</span>
+                </div>
+              </div>
+              <div class="kpi-subtext">
+                <span class="badge badge-healthy">Good Air Exchange</span>
+                <span style="color: var(--text-muted); font-size: 10px;">Target ≤ 1000 ppm</span>
+              </div>
+            </div>
+
+            <!-- KPI 3: Outdoor Mumbai Ambient Reference -->
+            <div class="card-enterprise kpi-card">
+              <div>
+                <span class="kpi-label">Mumbai Coastal Ambient</span>
+                <div class="kpi-value num-tabular" style="color: var(--status-warning-text);" id="mumbaiOutdoorPM25">
+                  58.5 <span class="kpi-unit">µg/m³</span>
+                </div>
+              </div>
+              <div class="kpi-subtext">
+                <span class="badge badge-warning" id="mumbaiOutdoorStatus">Moderate Ambient</span>
+                <span style="color: var(--text-muted); font-size: 10px;">Bandra Station</span>
+              </div>
+            </div>
+
+            <!-- KPI 4: Active Sensor Fleet -->
+            <div class="card-enterprise kpi-card">
+              <div>
+                <span class="kpi-label">Monitoring Coverage</span>
+                <div class="kpi-value num-tabular" id="campusActiveSensors">
+                  1 / 4 <span class="kpi-unit">Zones</span>
+                </div>
+              </div>
+              <div class="kpi-subtext">
+                <span class="badge badge-neutral" id="campusCoveragePercent">25% Instrumented</span>
+                <span style="color: var(--text-muted); font-size: 10px;">1 Online</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environmental Trend Analytics (24h / 7d Time-series Graph) -->
+          <div class="card-enterprise" style="padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 15px; font-weight: 700; margin: 0; color: var(--text-primary);">
+                  Environmental Trend Analytics
+                </h2>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 2px 0 0;">
+                  Multi-parameter indoor classroom microclimate trajectory vs. outdoor infiltration
+                </p>
+              </div>
+
+              <!-- Parameter selector tabs -->
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-primary" style="font-size: 11px; padding: 4px 10px;" id="btnTrendPM25">PM2.5</button>
+                <button class="btn-secondary" style="font-size: 11px; padding: 4px 10px;" id="btnTrendCO2">CO2</button>
+              </div>
+            </div>
+
+            <!-- Interactive SVG Trend Chart Canvas -->
+            <div style="background-color: var(--bg-surface-subtle); border-radius: var(--radius-md); padding: 16px 12px; position: relative;">
+              <svg id="trendSvgCanvas" viewBox="0 0 800 160" style="width: 100%; height: 160px; overflow: visible;">
+                <!-- Dynamically plotted by app.js -->
+              </svg>
+              <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 8px; font-family: monospace;">
+                <span>08:00 AM (Class Start)</span>
+                <span>10:30 AM (Recess)</span>
+                <span>01:00 PM (Lunch Purge)</span>
+                <span>03:30 PM (Dismissal)</span>
+                <span>Current</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Physical Zone Telemetry Cards Grid -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <h2 style="font-size: 15px; font-weight: 700; margin: 0; color: var(--text-primary);">
+                  Physical Zone Telemetry Operations
+                </h2>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 2px 0 0;">
+                  Individual room microclimates across Primary Academic Block
+                </p>
+              </div>
+            </div>
+
+            <div id="zoneCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+              <!-- Dynamically populated by app.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 2: INDOOR ZONES DIRECTORY ================= -->
+        <section id="view-zones" class="view-panel space-y-4 hidden">
+          <div class="card-enterprise" style="padding: 20px;">
+            <div style="margin-bottom: 16px;">
+              <h2 style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Detailed Zone Operations Directory</h2>
+              <p style="font-size: 12px; color: var(--text-secondary); margin: 3px 0 0;">Configured operational targets, hardware sensor associations, and data freshness</p>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table class="table-enterprise">
+                <thead>
+                  <tr>
+                    <th>Zone Name</th>
+                    <th>Building / Floor</th>
+                    <th>Zone Type</th>
+                    <th>Target PM2.5</th>
+                    <th>Target CO2</th>
+                    <th>Sensor Binding</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="zonesTableBody">
+                  <!-- Populated by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 3: OPERATIONAL ALERTS DISPATCH ================= -->
+        <section id="view-alerts" class="view-panel space-y-4 hidden">
+          <div class="card-enterprise" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Operational Alert Dispatch</h2>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 3px 0 0;">Deterministic threshold evaluation and lifecycle dispatch (OPEN → ACKNOWLEDGED → RESOLVED)</p>
+              </div>
+              <button id="btnRefreshAlerts" class="btn-secondary">↻ Refresh Alerts</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table class="table-enterprise">
+                <thead>
+                  <tr>
+                    <th>Severity</th>
+                    <th>Rule / Parameter</th>
+                    <th>Observed Value</th>
+                    <th>Status</th>
+                    <th>Triggered At</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="alertsTableBody">
+                  <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-muted);">No active operational alerts. All zones within nominal thresholds.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 4: WORK ORDERS & CORRECTIVE ACTIONS ================= -->
+        <section id="view-workorders" class="view-panel space-y-4 hidden">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <!-- Orders List -->
+            <div class="card-enterprise" style="padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                  <h2 style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Campus Corrective Work Orders</h2>
+                  <p style="font-size: 12px; color: var(--text-secondary); margin: 3px 0 0;">Auditable corrective action tracking (OPEN → ASSIGNED → IN_PROGRESS → RESOLVED)</p>
+                </div>
+                <button id="btnRefreshWorkOrders" class="btn-secondary">↻ Refresh Orders</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="table-enterprise">
+                  <thead>
+                    <tr>
+                      <th>Priority</th>
+                      <th>Work Scope</th>
+                      <th>Assigned To</th>
+                      <th>Status</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workOrdersTableBody">
+                    <tr>
+                      <td colspan="5" style="padding: 30px; text-align: center; color: var(--text-muted);">No work orders logged.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Create Work Order Form -->
+            <div class="card-enterprise" style="padding: 20px;">
+              <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">Dispatch Corrective Action</h3>
+              <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 16px;">Log auditable intervention for campus staff</p>
+
+              <form id="createWorkOrderForm" style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+                <div>
+                  <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Target Zone</label>
+                  <select id="woZoneSelect" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);"></select>
+                </div>
+                <div>
+                  <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Action Title</label>
+                  <input id="woTitleInput" type="text" placeholder="e.g. Inspect Classroom 4B dampers" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                </div>
+                <div>
+                  <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Description / Corrective Plan</label>
+                  <textarea id="woDescInput" rows="2" placeholder="Actionable directions for technician..." required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Priority</label>
+                    <select id="woPrioritySelect" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                      <option value="MEDIUM">MEDIUM</option>
+                      <option value="HIGH">HIGH</option>
+                      <option value="URGENT">URGENT</option>
+                      <option value="LOW">LOW</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Assign Staff</label>
+                    <input id="woAssigneeInput" type="text" value="Ramesh Sharma" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                  </div>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 6px; padding: 10px;">
+                  Dispatch Work Order
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 5: LIVE IOT TELEMETRY SIMULATOR ================= -->
+        <section id="view-telemetry" class="view-panel space-y-4 hidden">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Packet Transmitter -->
+            <div class="card-enterprise" style="padding: 20px;">
+              <h2 style="font-size: 15px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">Simulate IoT Hardware Telemetry</h2>
+              <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 16px;">Transmit cryptographic packet to POST /v1/telemetry/ingest</p>
+
+              <form id="ingestSimulatorForm" style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+                <div>
+                  <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Target Zone</label>
+                  <select id="simZoneSelect" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);"></select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">PM2.5 (µg/m³)</label>
+                    <input id="simPM25" type="number" step="0.1" value="42.5" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                  </div>
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">CO2 (ppm)</label>
+                    <input id="simCO2" type="number" step="1" value="850" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Temp (°C)</label>
+                    <input id="simTemp" type="number" step="0.1" value="26.5" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                  </div>
+                  <div>
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">RH (%)</label>
+                    <input id="simRH" type="number" step="0.1" value="55.0" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                  </div>
+                </div>
+                <div>
+                  <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Provenance Flag</label>
+                  <select id="simProvenance" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface); color: var(--text-primary);">
+                    <option value="SIMULATED">SIMULATED (Demonstration Data)</option>
+                    <option value="MEASURED">MEASURED (Hardware Calibration)</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 10px; margin-top: 4px;">
+                  Transmit Telemetry Packet
+                </button>
+              </form>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="card-enterprise" style="padding: 20px; display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+                  Ingestion Terminal & Verification Log
+                </span>
+                <span class="badge badge-healthy" style="font-family: monospace; font-size: 10px;">IDEMPOTENCY: ACTIVE</span>
+              </div>
+              <div id="telemetryTerminal" style="flex: 1; background: #0F172A; color: #34D399; font-family: monospace; font-size: 11px; padding: 12px; border-radius: var(--radius-md); overflow-y: auto; min-height: 220px; line-height: 1.5;">
+                <div>// Ready to receive authenticated IoT payloads...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 6: MUMBAI AMBIENT AIR CONTEXT ================= -->
+        <section id="view-outdoor" class="view-panel space-y-4 hidden">
+          <div class="card-enterprise" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Mumbai Metropolitan Ambient Context</h2>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 3px 0 0;">Evaluating classroom indoor microclimate against external coastal Mumbai ambient air</p>
+              </div>
+              <span class="badge badge-warning">Bandra / BKC Reference</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+              <div style="padding: 16px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Ambient PM2.5</span>
+                <div class="num-tabular" style="font-size: 26px; font-weight: 700; color: var(--status-warning-text); margin: 4px 0;" id="outPM25Val">58.5 µg/m³</div>
+                <span style="font-size: 11px; color: var(--text-secondary);">Infiltration factor ~0.7 with closed windows</span>
+              </div>
+
+              <div style="padding: 16px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Ambient PM10</span>
+                <div class="num-tabular" style="font-size: 26px; font-weight: 700; color: var(--text-primary); margin: 4px 0;" id="outPM10Val">105.0 µg/m³</div>
+                <span style="font-size: 11px; color: var(--text-secondary);">Coarse road & construction dust</span>
+              </div>
+
+              <div style="padding: 16px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Data Provenance</span>
+                <div style="font-size: 15px; font-weight: 600; color: var(--accent-primary); margin: 8px 0 4px;" id="outSourceVal">Open-Meteo / CAMS Model</div>
+                <span style="font-size: 11px; color: var(--text-secondary);">Hourly atmospheric wind vectors</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 7: AI OPERATIONS EXPLAINER ================= -->
+        <section id="view-chat" class="view-panel space-y-4 hidden" style="height: 560px; display: flex; flex-direction: column;">
+          <div class="card-enterprise" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+            <div style="padding: 12px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface-subtle);">
+              <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">AI Operations Intelligence Assistant</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Grounded in St. Xavier's Pilot Telemetry</span>
+            </div>
+
+            <div id="chatMessages" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div style="display: flex; gap: 10px;">
+                <div style="width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--accent-primary-subtle); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0;">
+                  AI
+                </div>
+                <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); padding: 12px 14px; border-radius: var(--radius-md); max-width: 80%; line-height: 1.5;">
+                  <p style="margin: 0 0 6px; color: var(--text-primary);">Hello! I am your institutional air-quality operations assistant for <strong>St. Xavier's Model School</strong>. Currently Classroom 4B is operating at PM2.5 38.4 µg/m³ and CO2 720 ppm.</p>
+                  <p style="margin: 0; font-size: 11px; color: var(--text-muted);">Inquire about ventilation CADR requirements, window schedules, or Mumbai ambient inversion forecasts.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suggested chips -->
+            <div style="padding: 8px 16px; background: var(--bg-surface); border-top: 1px solid var(--border-subtle); display: flex; gap: 8px; overflow-x: auto;">
+              <button class="btn-secondary prompt-chip" style="font-size: 11px; white-space: nowrap;">How is Classroom 4B ventilation performing?</button>
+              <button class="btn-secondary prompt-chip" style="font-size: 11px; white-space: nowrap;">Should we open windows during afternoon recess?</button>
+              <button class="btn-secondary prompt-chip" style="font-size: 11px; white-space: nowrap;">Explain the CADR requirement for Grade 8</button>
+            </div>
+
+            <!-- Input bar -->
+            <form id="chatForm" style="padding: 12px 16px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px; background: var(--bg-surface);">
+              <input id="chatInput" type="text" placeholder="Inquire about campus air conditions or HVAC operations..." style="flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-surface-subtle); color: var(--text-primary); font-size: 13px;">
+              <button type="submit" class="btn-primary" style="padding: 8px 16px;">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ================= VIEW 8: AUDIT, REPORTS & EXPORT ================= -->
+        <section id="view-privacy" class="view-panel space-y-4 hidden">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Governance Controls -->
+            <div class="card-enterprise" style="padding: 20px;">
+              <h2 style="font-size: 16px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">Data Integrity & Governance</h2>
+              <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 16px;">Pilot deployment controls and immutable historical telemetry rules</p>
+
+              <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; color: var(--text-secondary);">
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                  <strong style="color: var(--text-primary);">Historical Integrity Guaranteed:</strong> Sensor readings are immutable. Soft deletion of zones or decommissioned hardware sets associations to NULL without purging baseline history.
+                </div>
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                  <strong style="color: var(--text-primary);">Cryptographic Sensor Keys:</strong> 256-bit entropy API keys, salted SHA-256 verification, with immediate revocation capabilities.
+                </div>
+                <div style="padding: 12px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle);">
+                  <strong style="color: var(--text-primary);">Clear Provenance:</strong> Measurements distinguish MEASURED hardware telemetry from SIMULATED benchmark sets.
+                </div>
+              </div>
+            </div>
+
+            <!-- Institutional Reports & Exports -->
+            <div class="card-enterprise" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <h2 style="font-size: 16px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary);">Institutional Reports & Export</h2>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 16px;">Generate executive compliance summaries and download telemetry datasets</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div style="padding: 14px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                      <strong style="color: var(--text-primary); font-size: 13px; display: block;">Download Raw Telemetry (CSV)</strong>
+                      <span style="font-size: 11px; color: var(--text-muted);">Clean time-series export with sensor IDs, timestamps, quality flags, and units.</span>
+                    </div>
+                    <button onclick="downloadTelemetryCSV()" class="btn-primary" style="flex-shrink: 0;">
+                      📥 Export CSV
+                    </button>
+                  </div>
+
+                  <div style="padding: 14px; border-radius: var(--radius-md); background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                      <strong style="color: var(--text-primary); font-size: 13px; display: block;">Institutional Operations Summary</strong>
+                      <span style="font-size: 11px; color: var(--text-muted);">7-day compliance report: coverage %, alert resolution rate, and zone benchmarks.</span>
+                    </div>
+                    <button onclick="viewExecutiveReport()" class="btn-secondary" style="flex-shrink: 0;">
+                      📄 View Summary
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 16px;">
+                Compliant with institutional environmental compliance auditing frameworks.
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- App Shell Footer -->
+      <footer style="padding: 16px 24px; border-top: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold tracking-tight text-white text-base">Cleair Ops</span>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-950 border border-teal-500/40 text-teal-300 font-mono">PILOT MMR</span>
-          </div>
-          <span class="text-xs text-slate-400 block -mt-0.5" id="headerOrgName">St. Xavier's Model School • South Mumbai</span>
+          Cleair Institutional Air Quality Platform • St. Xavier's Model School Pilot • Mumbai, India
         </div>
-      </div>
-
-      <!-- Campus Quick Status & Mode Toggle -->
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-xl text-xs">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-slate-300 font-medium">Campus Sensors:</span>
-          <span class="text-emerald-300 font-bold" id="headerSensorStatus">ONLINE</span>
+        <div style="font-family: monospace; font-size: 11px;">
+          UAQA v2.0-pilot • Epistemic Integrity Verified
         </div>
-        <select id="viewModeToggle" class="bg-slate-800 border border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-200">
-          <option value="institutional">Institutional Operations (Pilot)</option>
-          <option value="consumer">Personal / Household Mode</option>
-        </select>
-      </div>
+      </footer>
     </div>
-
-    <!-- Navigation Tabs -->
-    <nav class="max-w-6xl mx-auto px-4 flex gap-4 text-sm border-t border-slate-800/60 overflow-x-auto">
-      <button class="nav-tab active py-2.5 border-b-2 border-teal-400 font-medium text-teal-300" data-view="facility">Campus Overview</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="zones">Indoor Zones</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5" data-view="alerts">
-        <span>Active Alerts</span>
-        <span id="alertsBadge" class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-mono px-1.5 py-0.2 rounded-full hidden">0</span>
-      </button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="workorders">Work Orders & Actions</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="telemetry">Live IoT Feed</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="outdoor">Mumbai Ambient</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="chat">AI Operations Explainer</button>
-      <button class="nav-tab py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200" data-view="privacy">Audit & Data Governance</button>
-    </nav>
-  </header>
-
-  <!-- Main Content Container -->
-  <main class="flex-1 max-w-6xl mx-auto w-full p-4 space-y-6">
-    <!-- View 1: Institutional Campus Overview -->
-    <section id="view-facility" class="view-panel space-y-5">
-      <!-- Site Summary Card -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-          <div>
-            <span class="text-xs uppercase tracking-wider text-slate-400 font-medium" id="siteCampusLocation">Mumbai Metropolitan Region • South Mumbai Campus</span>
-            <h1 class="text-2xl font-black text-white mt-1">St. Xavier's Academic Complex</h1>
-            <p class="text-xs text-slate-400 mt-1">Operational target: PM2.5 ≤ 60 µg/m³ • CO2 ≤ 1000 ppm • Continuous Mechanical Ventilation</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300">
-              Building: <strong>Primary Academic Block</strong>
-            </span>
-            <button id="btnRefreshTelemetry" class="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs px-3 py-1.5 rounded-xl font-medium transition">
-              ↻ Refresh Feeds
-            </button>
-          </div>
-        </div>
-
-        <!-- Campus Key Metrics Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800 text-xs">
-          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-            <span class="text-slate-400 block mb-1">Campus Indoor PM2.5</span>
-            <div class="text-xl font-black text-emerald-400" id="campusAvgPM25">38.4 <span class="text-xs font-normal text-slate-400">µg/m³</span></div>
-            <span class="text-[10px] text-emerald-400/80">Optimal (Target ≤ 60)</span>
-          </div>
-          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-            <span class="text-slate-400 block mb-1">Indoor CO2 Baseline</span>
-            <div class="text-xl font-black text-teal-300" id="campusAvgCO2">720 <span class="text-xs font-normal text-slate-400">ppm</span></div>
-            <span class="text-[10px] text-teal-400/80">Adequate Fresh Air</span>
-          </div>
-          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-            <span class="text-slate-400 block mb-1">Mumbai Outdoor Context</span>
-            <div class="text-xl font-black text-amber-300" id="mumbaiOutdoorPM25">58.5 <span class="text-xs font-normal text-slate-400">µg/m³</span></div>
-            <span class="text-[10px] text-amber-400/80" id="mumbaiOutdoorStatus">Moderate Coastal Ambient</span>
-          </div>
-          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-            <span class="text-slate-400 block mb-1">Active IoT Hardware</span>
-            <div class="text-xl font-black text-white" id="campusActiveSensors">1 / 4 <span class="text-xs font-normal text-slate-400">Zones</span></div>
-            <span class="text-[10px] text-slate-400">3 awaiting deployment</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Institutional Zone Grid (Dynamic) -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-semibold text-slate-100">Physical Zone Telemetry Cards</h2>
-            <p class="text-xs text-slate-400">Real-time status across academic classrooms, laboratories, and common areas</p>
-          </div>
-          <div class="text-xs text-slate-400 flex items-center gap-2">
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Online
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 ml-2"></span> Stale
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-600 ml-2"></span> Unassigned
-          </div>
-        </div>
-
-        <div id="zoneCardsGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <!-- Dynamically populated by app.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- View 2: Indoor Zones Breakdown -->
-    <section id="view-zones" class="view-panel space-y-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <h2 class="text-lg font-bold text-white mb-1">Detailed Zone Operations Directory</h2>
-        <p class="text-xs text-slate-400 mb-4">Inspection of zone targets, HVAC filtration status, and historical data integrity</p>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-300">
-            <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-              <tr>
-                <th class="py-3 px-3">Zone Name</th>
-                <th class="py-3 px-3">Building / Floor</th>
-                <th class="py-3 px-3">Zone Type</th>
-                <th class="py-3 px-3">Target PM2.5</th>
-                <th class="py-3 px-3">Target CO2</th>
-                <th class="py-3 px-3">Hardware Sensor</th>
-                <th class="py-3 px-3">Freshness</th>
-              </tr>
-            </thead>
-            <tbody id="zonesTableBody" class="divide-y divide-slate-800/60 font-mono">
-              <!-- Populated via app.js -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- View: Operational Alert Center -->
-    <section id="view-alerts" class="view-panel space-y-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-lg font-bold text-white">Operational Alert Dispatch</h2>
-            <p class="text-xs text-slate-400">Deterministic threshold evaluation and lifecycle management (OPEN → ACKNOWLEDGED → RESOLVED)</p>
-          </div>
-          <button id="btnRefreshAlerts" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-xl border border-slate-700">
-            ↻ Refresh Alerts
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left text-slate-300">
-            <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-              <tr>
-                <th class="py-3 px-3">Severity</th>
-                <th class="py-3 px-3">Zone / Parameter</th>
-                <th class="py-3 px-3">Observed Value</th>
-                <th class="py-3 px-3">Status</th>
-                <th class="py-3 px-3">Triggered</th>
-                <th class="py-3 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="alertsTableBody" class="divide-y divide-slate-800/60">
-              <tr>
-                <td colspan="6" class="py-6 text-center text-slate-500 font-mono">No active alerts recorded. All zones within nominal operational boundaries.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- View: Work Orders & Interventions Dispatch -->
-    <section id="view-workorders" class="view-panel space-y-4 hidden">
-      <div class="grid lg:grid-cols-3 gap-4">
-        <!-- Work Orders List (2 Cols) -->
-        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h2 class="text-lg font-bold text-white">Campus Corrective Work Orders</h2>
-              <p class="text-xs text-slate-400">Auditable institutional intervention dispatch (OPEN → ASSIGNED → IN_PROGRESS → RESOLVED)</p>
-            </div>
-            <button id="btnRefreshWorkOrders" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-xl border border-slate-700">
-              ↻ Refresh Orders
-            </button>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left text-slate-300">
-              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-                <tr>
-                  <th class="py-2.5 px-3">Priority</th>
-                  <th class="py-2.5 px-3">Title / Scope</th>
-                  <th class="py-2.5 px-3">Assigned To</th>
-                  <th class="py-2.5 px-3">Status</th>
-                  <th class="py-2.5 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="workOrdersTableBody" class="divide-y divide-slate-800/60">
-                <tr>
-                  <td colspan="5" class="py-6 text-center text-slate-500 font-mono">No active work orders. Everything operating normally.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Create Work Order Form (1 Col) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <h3 class="text-base font-bold text-white mb-1">Dispatch Corrective Action</h3>
-          <p class="text-xs text-slate-400 mb-3">Create auditable work order for facilities staff</p>
-          <form id="createWorkOrderForm" class="space-y-3 text-xs">
-            <div>
-              <label class="block text-slate-400 mb-1">Target Zone</label>
-              <select id="woZoneSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">Title</label>
-              <input id="woTitleInput" type="text" placeholder="e.g. Purge classroom ventilation" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">Description / Action Plan</label>
-              <textarea id="woDescInput" rows="2" placeholder="Describe physical corrective action..." required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200"></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-slate-400 mb-1">Priority</label>
-                <select id="woPrioritySelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-                  <option value="MEDIUM">MEDIUM</option>
-                  <option value="HIGH">HIGH</option>
-                  <option value="URGENT">URGENT</option>
-                  <option value="LOW">LOW</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-slate-400 mb-1">Assign Staff</label>
-                <input id="woAssigneeInput" type="text" placeholder="Staff Name" value="Ramesh Sharma" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-              </div>
-            </div>
-            <button type="submit" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-2.5 rounded-xl transition">
-              Dispatch Work Order
-            </button>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- View 3: Live IoT Telemetry Simulator & Inspector -->
-    <section id="view-telemetry" class="view-panel space-y-4 hidden">
-      <div class="grid sm:grid-cols-2 gap-4">
-        <!-- Ingestion Simulator -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <h2 class="text-base font-bold text-white mb-1">Simulate IoT Hardware Telemetry</h2>
-          <p class="text-xs text-slate-400 mb-4">Submit authenticated readings via POST /v1/telemetry/ingest</p>
-
-          <form id="ingestSimulatorForm" class="space-y-3 text-xs">
-            <div>
-              <label class="block text-slate-400 mb-1">Target Zone</label>
-              <select id="simZoneSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200">
-                <!-- Dynamically filled -->
-              </select>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-slate-400 mb-1">PM2.5 (µg/m³)</label>
-                <input type="number" id="simPM25" value="45.2" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
-              </div>
-              <div>
-                <label class="block text-slate-400 mb-1">CO2 (ppm)</label>
-                <input type="number" id="simCO2" value="840" step="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-slate-400 mb-1">Temperature (°C)</label>
-                <input type="number" id="simTemp" value="25.5" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
-              </div>
-              <div>
-                <label class="block text-slate-400 mb-1">Relative Humidity (%)</label>
-                <input type="number" id="simRH" value="62" step="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-100 font-mono">
-              </div>
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-1">Provenance Tag</label>
-              <select id="simProvenance" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-slate-200">
-                <option value="MEASURED">MEASURED (Physical Hardware Observation)</option>
-                <option value="SIMULATED" selected>SIMULATED (Benchmarking / Test Scenario)</option>
-              </select>
-            </div>
-            <button type="submit" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-2.5 rounded-xl transition mt-2">
-              Transmit Packet to Ingestion Endpoint
-            </button>
-          </form>
-        </div>
-
-        <!-- Ingestion Terminal & Verification Log -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-white uppercase tracking-wider">Ingestion Response Terminal</span>
-            <span class="text-[10px] text-teal-400 font-mono">IDEMPOTENCY: ACTIVE</span>
-          </div>
-          <div id="telemetryTerminal" class="flex-1 bg-slate-950 rounded-xl p-3 font-mono text-[11px] text-emerald-400 overflow-y-auto space-y-1 min-h-[220px]">
-            <div>// Ready to receive authenticated IoT payloads...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- View 4: Mumbai Ambient Air Context -->
-    <section id="view-outdoor" class="view-panel space-y-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-lg font-bold text-white">Mumbai Metropolitan Ambient Context</h2>
-            <p class="text-xs text-slate-400">Comparing classroom indoor microclimate against external Mumbai coastal air</p>
-          </div>
-          <span class="text-xs px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 font-medium">Bandra / BKC Reference</span>
-        </div>
-
-        <div class="grid sm:grid-cols-3 gap-3 text-xs">
-          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-            <span class="text-slate-400 block mb-1">Ambient PM2.5</span>
-            <div class="text-2xl font-black text-amber-300" id="outPM25Val">58.5 <span class="text-xs text-slate-400">µg/m³</span></div>
-            <span class="text-[10px] text-slate-500 mt-1 block">Infiltration factor ~0.7 with closed windows</span>
-          </div>
-          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-            <span class="text-slate-400 block mb-1">Ambient PM10</span>
-            <div class="text-2xl font-black text-slate-200" id="outPM10Val">105.0 <span class="text-xs text-slate-400">µg/m³</span></div>
-            <span class="text-[10px] text-slate-500 mt-1 block">Coarse road and construction dust</span>
-          </div>
-          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-            <span class="text-slate-400 block mb-1">Source Provenance</span>
-            <div class="text-sm font-semibold text-teal-400 mt-1" id="outSourceVal">Open-Meteo / CAMS Model</div>
-            <span class="text-[10px] text-slate-500 mt-1 block">Updated hourly with atmospheric wind vector</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- View 5: AI Operations Explainer (SRS B11, B12) -->
-    <section id="view-chat" class="view-panel space-y-4 hidden flex flex-col h-[520px]">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl flex-1 flex flex-col overflow-hidden">
-        <div class="px-4 py-3 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between text-xs">
-          <span class="text-slate-300 font-medium">AI Operations Intelligence Assistant</span>
-          <span class="text-slate-400">Grounded in St. Xavier's Pilot Telemetry</span>
-        </div>
-
-        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
-              AI
-            </div>
-            <div class="bg-slate-800/80 rounded-2xl rounded-tl-none p-3.5 max-w-[85%] space-y-2 border border-slate-700/50">
-              <p class="text-slate-200">Hello! I am your institutional air-quality operations assistant for <strong>St. Xavier's Model School</strong>. Current indoor readings show Classroom 4B is operating at PM2.5 38.4 µg/m³ and CO2 720 ppm.</p>
-              <p class="text-xs text-slate-400">Ask about filtration performance, ventilation schedules, or Mumbai ambient inversion forecasts.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="px-4 py-2 bg-slate-900 border-t border-slate-800/60 flex gap-2 overflow-x-auto text-xs">
-          <button class="prompt-chip whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">
-            How is Classroom 4B ventilation performing?
-          </button>
-          <button class="prompt-chip whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">
-            Should we open windows during afternoon recess?
-          </button>
-          <button class="prompt-chip whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700">
-            Explain the CADR requirement for Grade 8
-          </button>
-        </div>
-
-        <form id="chatForm" class="p-3 bg-slate-950 border-t border-slate-800 flex gap-2">
-          <input id="chatInput" type="text" placeholder="Inquire about campus air conditions or HVAC operations..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none focus:border-teal-500">
-          <button type="submit" class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition">
-            Send
-          </button>
-        </form>
-      </div>
-    </section>
-
-    <!-- View 6: Privacy & Data Governance (F11, FR-PRV) -->
-    <section id="view-privacy" class="view-panel space-y-4 hidden">
-      <div class="grid md:grid-cols-2 gap-4">
-        <!-- Governance Controls -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div>
-            <h2 class="text-lg font-bold text-white">Data Integrity & Governance</h2>
-            <p class="text-xs text-slate-400">Pilot deployment controls and immutable historical telemetry rules</p>
-          </div>
-
-          <div class="space-y-3 text-xs text-slate-300">
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-              <strong>Historical Integrity Guaranteed:</strong> Sensor readings are immutable. Soft deletion of zones or decommissioned hardware sets associations to NULL without purging baseline history.
-            </div>
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-              <strong>Cryptographic Sensor Keys:</strong> 256-bit entropy API keys, salted SHA-256 verification, with immediate revocation capabilities.
-            </div>
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-              <strong>Clear Provenance:</strong> Measurements distinguish MEASURED hardware telemetry from SIMULATED benchmark sets.
-            </div>
-          </div>
-        </div>
-
-        <!-- Institutional Reports & Exports -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
-          <div>
-            <h2 class="text-lg font-bold text-white">Institutional Reports & Export</h2>
-            <p class="text-xs text-slate-400">Generate executive compliance summaries and download telemetry datasets</p>
-          </div>
-
-          <div class="space-y-3 text-xs">
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-              <div>
-                <strong class="text-slate-200 block text-sm">Download Raw Telemetry (CSV)</strong>
-                <span class="text-slate-400 text-[11px]">Clean time-series export with sensor IDs, timestamps, quality flags, and units.</span>
-              </div>
-              <button onclick="downloadTelemetryCSV()" class="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 px-3 py-2 rounded-xl text-xs font-semibold shrink-0">
-                📥 Export CSV
-              </button>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-              <div>
-                <strong class="text-slate-200 block text-sm">Institutional Operations Summary</strong>
-                <span class="text-slate-400 text-[11px]">7-day compliance report: coverage %, alert resolution rate, and zone benchmarks.</span>
-              </div>
-              <button onclick="viewExecutiveReport()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold shrink-0">
-                📄 View Summary
-              </button>
-            </div>
-          </div>
-
-          <div class="text-[10px] text-slate-500 italic">
-            Compliant with institutional environmental compliance auditing frameworks.
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="border-t border-slate-900 text-center py-3 text-xs text-slate-500">
-    Cleair Institutional Air Quality Platform • St. Xavier's Model School Pilot • Mumbai, India
-  </footer>
+  </div>
 
   <script src="/app.js"></script>
 </body>
