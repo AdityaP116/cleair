@@ -1,31 +1,42 @@
 /* UAQA / Cleair Enterprise Design System */
 :root {
+  /* Palette Direct Mapping:
+     #EEF8FF: Air Light / Canvas Tint
+     #A3D1E0: Sky Mist / Secondary Accent / Soft Highlights
+     #0077B3: Deep Maritime Blue / Primary Brand Accent
+     #D1E8E2: Mint Sage / Healthy Status Tint / Subtle Surface
+  */
+  --palette-air-light: #EEF8FF;
+  --palette-sky-mist: #A3D1E0;
+  --palette-blue-deep: #0077B3;
+  --palette-mint-sage: #D1E8E2;
+
   /* Surface & Background */
-  --bg-primary: #F8FAFC;
+  --bg-primary: #F4F9FD;
   --bg-surface: #FFFFFF;
-  --bg-surface-subtle: #F1F5F9;
+  --bg-surface-subtle: #EEF8FF;
   --bg-surface-elevated: #FFFFFF;
-  --border-subtle: #E2E8F0;
-  --border-strong: #CBD5E1;
+  --border-subtle: #D8E7F0;
+  --border-strong: #A3D1E0;
 
   /* Typography */
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-primary: #0C2333;
+  --text-secondary: #3B5A6F;
+  --text-muted: #6C8E9E;
 
   /* Accents */
-  --accent-primary: #0F766E;       /* Deep Teal */
-  --accent-primary-hover: #0D9488;
-  --accent-primary-subtle: #CCFBF1;
-  --accent-secondary: #0284C7;     /* Sky Blue */
+  --accent-primary: #0077B3;            /* Brand Deep Blue from palette */
+  --accent-primary-hover: #005F8F;
+  --accent-primary-subtle: #E1F2FB;
+  --accent-secondary: #58B0CA;          /* Refined tone of Sky Mist */
 
   /* Semantic Status */
-  --status-healthy-bg: #ECFDF5;
-  --status-healthy-text: #047857;
-  --status-healthy-border: #A7F3D0;
-  --status-healthy-dot: #10B981;
+  --status-healthy-bg: #E8F5F1;         /* Harmonized Mint Sage */
+  --status-healthy-text: #0E6B56;
+  --status-healthy-border: #D1E8E2;     /* Palette Mint Sage */
+  --status-healthy-dot: #1A936F;
 
-  --status-warning-bg: #FFFBEB;
+  --status-warning-bg: #FFF8EB;
   --status-warning-text: #B45309;
   --status-warning-border: #FDE68A;
   --status-warning-dot: #F59E0B;
@@ -35,42 +46,42 @@
   --status-critical-border: #FECACA;
   --status-critical-dot: #EF4444;
 
-  --status-neutral-bg: #F8FAFC;
-  --status-neutral-text: #64748B;
-  --status-neutral-border: #E2E8F0;
-  --status-neutral-dot: #94A3B8;
+  --status-neutral-bg: #EEF8FF;
+  --status-neutral-text: #486581;
+  --status-neutral-border: #D8E7F0;
+  --status-neutral-dot: #829AB1;
 
   /* Shadow & Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
-  --shadow-elevated: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 50, 90, 0.04);
+  --shadow-card: 0 1px 3px 0 rgba(0, 45, 80, 0.05), 0 1px 2px -1px rgba(0, 45, 80, 0.03);
+  --shadow-elevated: 0 10px 15px -3px rgba(0, 45, 80, 0.07), 0 4px 6px -4px rgba(0, 45, 80, 0.03);
 }
 
-/* Dark Mode Tokens */
+/* Dark Mode Tokens (Harmonized with Blue/Teal Navy Palette) */
 [data-theme="dark"] {
-  --bg-primary: #0B0F19;
-  --bg-surface: #111827;
-  --bg-surface-subtle: #1F2937;
-  --bg-surface-elevated: #1E293B;
-  --border-subtle: #1F293D;
-  --border-strong: #334155;
+  --bg-primary: #07131D;
+  --bg-surface: #0E1F2D;
+  --bg-surface-subtle: #142838;
+  --bg-surface-elevated: #183144;
+  --border-subtle: #1B384E;
+  --border-strong: #274D6B;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #F0F7FB;
+  --text-secondary: #9DBECE;
+  --text-muted: #64879B;
 
-  --accent-primary: #14B8A6;
-  --accent-primary-hover: #2DD4BF;
-  --accent-primary-subtle: rgba(20, 184, 166, 0.15);
+  --accent-primary: #38BDF8;
+  --accent-primary-hover: #0EA5E9;
+  --accent-primary-subtle: rgba(56, 189, 248, 0.15);
 
-  --status-healthy-bg: rgba(16, 185, 129, 0.12);
-  --status-healthy-text: #34D399;
-  --status-healthy-border: rgba(16, 185, 129, 0.3);
-  --status-healthy-dot: #10B981;
+  --status-healthy-bg: rgba(209, 232, 226, 0.12);
+  --status-healthy-text: #6EE7B7;
+  --status-healthy-border: rgba(209, 232, 226, 0.25);
+  --status-healthy-dot: #34D399;
 
   --status-warning-bg: rgba(245, 158, 11, 0.12);
   --status-warning-text: #FBBF24;
@@ -82,14 +93,14 @@
   --status-critical-border: rgba(239, 68, 68, 0.3);
   --status-critical-dot: #EF4444;
 
-  --status-neutral-bg: rgba(148, 163, 184, 0.1);
-  --status-neutral-text: #94A3B8;
-  --status-neutral-border: rgba(148, 163, 184, 0.2);
-  --status-neutral-dot: #64748B;
+  --status-neutral-bg: rgba(163, 209, 224, 0.1);
+  --status-neutral-text: #9DBECE;
+  --status-neutral-border: rgba(163, 209, 224, 0.2);
+  --status-neutral-dot: #64879B;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
-  --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }
 
 /* Base resets & tabular layout */
