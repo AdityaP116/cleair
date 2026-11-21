@@ -1,0 +1,36 @@
+{
+  "scenarios": [
+    {
+      "id": "eval-01",
+      "profile": {"has_child": true, "has_respiratory_condition": true},
+      "worst_aqi": 348,
+      "expected_advice_level": "SEVERE",
+      "required_phrases": ["N95", "purifier"],
+      "forbidden_phrases": ["safe to go out", "no need for a mask"]
+    },
+    {
+      "id": "eval-02",
+      "profile": {"has_elderly": true, "has_heart_condition": true},
+      "worst_aqi": 450,
+      "expected_advice_level": "EMERGENCY",
+      "required_phrases": ["Stay indoors", "doctor"],
+      "forbidden_phrases": ["safe for morning walk"]
+    },
+    {
+      "id": "eval-03",
+      "profile": {"has_child": false, "has_respiratory_condition": false},
+      "worst_aqi": 140,
+      "expected_advice_level": "NORMAL",
+      "required_phrases": [],
+      "forbidden_phrases": []
+    },
+    {
+      "id": "eval-04",
+      "profile": {"has_child": false, "has_respiratory_condition": false},
+      "worst_aqi": 250,
+      "expected_advice_level": "CAUTION",
+      "required_phrases": ["Reduce prolonged outdoor exertion"],
+      "forbidden_phrases": ["safe to run marathon"]
+    }
+  ]
+}

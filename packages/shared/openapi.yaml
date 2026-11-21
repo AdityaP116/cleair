@@ -1,0 +1,874 @@
+openapi: 3.0.3
+info:
+  title: Urban Air Quality Assistant (SmogSense) API
+  description: API for personalized, location-aware, quantified daily guidance during severe winter smog.
+  version: 1.0.0
+servers:
+  - url: /v1
+    description: Current API version
+
+paths:
+  /session:
+    post:
+      summary: Create anonymous user session
+      operationId: createSession
+      responses:
+        '200':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  /profile:
+    get:
+      summary: Read user profile
+      operationId: getProfile
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+    put:
+      summary: Update user profile
+      operationId: updateProfile
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+  /consents:
+    post:
+      summary: Record user consent
+      operationId: recordConsent
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentRequest'
+      responses:
+        '200':
+          description: Consent recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentResponse'
+
+  /air/current:
+    get:
+      summary: Current AQI and pollutants for location
+      operationId: getCurrentAir
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lon
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Current air data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AirCurrentResponse'
+
+  /air/forecast:
+    get:
+      summary: Hourly air quality and weather forecast
+      operationId: getForecast
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lon
+          in: query
+          schema:
+            type: number
+        - name: hours
+          in: query
+          schema:
+            type: integer
+            default: 48
+      responses:
+        '200':
+          description: Forecast data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AirForecastResponse'
+
+  /risk:
+    get:
+      summary: Rule-engine risk assessment for user
+      operationId: getRisk
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Risk assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskResponse'
+
+  /plan:
+    get:
+      summary: Daily plan timeline
+      operationId: getDailyPlan
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            enum: [today, tomorrow]
+            default: today
+      responses:
+        '200':
+          description: Daily plan timeline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResponse'
+
+  /chat:
+    post:
+      summary: Conversational assistant turn
+      operationId: chatTurn
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: stream
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Assistant response (JSON or SSE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+            text/event-stream:
+              schema:
+                type: string
+
+  /impact/estimate:
+    post:
+      summary: Quantify impact of an action
+      operationId: estimateImpact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImpactEstimateRequest'
+      responses:
+        '200':
+          description: Impact result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactResult'
+
+  /actions:
+    post:
+      summary: Log a mitigated action
+      operationId: logAction
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogActionRequest'
+      responses:
+        '200':
+          description: Action logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogActionResponse'
+
+  /dashboard:
+    get:
+      summary: Dashboard metrics and trends
+      operationId: getDashboard
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d]
+            default: 7d
+      responses:
+        '200':
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+
+  /notifications/settings:
+    get:
+      summary: Get notification preferences
+      operationId: getNotificationSettings
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettings'
+    put:
+      summary: Update notification preferences
+      operationId: updateNotificationSettings
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettings'
+      responses:
+        '200':
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettings'
+
+  /notifications/subscribe:
+    post:
+      summary: Register push subscription
+      operationId: subscribePush
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /privacy/export:
+    get:
+      summary: Export all user data as JSON
+      operationId: exportData
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Exported data dump
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /privacy/data:
+    delete:
+      summary: One-tap delete all user data
+      operationId: deleteData
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Data deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /health:
+    get:
+      summary: Service health and dependency status
+      operationId: getHealth
+      responses:
+        '200':
+          description: Health check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: header
+      name: X-Session-Token
+
+  schemas:
+    AdviceLevel:
+      type: string
+      enum: [NORMAL, CAUTION, HIGH, SEVERE, EMERGENCY]
+
+    ConfidenceLevel:
+      type: string
+      enum: [Low, Medium, High]
+
+    SessionResponse:
+      type: object
+      required: [session_token, user_id]
+      properties:
+        session_token:
+          type: string
+        user_id:
+          type: string
+
+    Profile:
+      type: object
+      required: [user_id, language, budget_tier]
+      properties:
+        user_id:
+          type: string
+        city:
+          type: string
+        locality:
+          type: string
+        geohash:
+          type: string
+        has_child:
+          type: boolean
+          default: false
+        has_elderly:
+          type: boolean
+          default: false
+        is_pregnant:
+          type: boolean
+          default: false
+        has_respiratory_condition:
+          type: boolean
+          default: false
+        has_heart_condition:
+          type: boolean
+          default: false
+        commute_mode:
+          type: string
+          enum: [walk, two_wheeler, car, bus, metro, train, wfh]
+        commute_minutes_per_day:
+          type: integer
+        outdoor_work:
+          type: boolean
+          default: false
+        home_size_sqm:
+          type: number
+        ceiling_height_m:
+          type: number
+          default: 2.7
+        has_purifier:
+          type: boolean
+          default: false
+        purifier_cadr_m3h:
+          type: number
+        has_ac:
+          type: boolean
+          default: false
+        cooking_fuel:
+          type: string
+          enum: [lpg, png, induction, biomass, other]
+        budget_tier:
+          type: string
+          enum: [free, low, mid, high]
+          default: free
+        language:
+          type: string
+          default: en
+        briefing_time:
+          type: string
+          default: "06:30"
+
+    ProfileUpdate:
+      type: object
+      properties:
+        city:
+          type: string
+        locality:
+          type: string
+        geohash:
+          type: string
+        has_child:
+          type: boolean
+        has_elderly:
+          type: boolean
+        is_pregnant:
+          type: boolean
+        has_respiratory_condition:
+          type: boolean
+        has_heart_condition:
+          type: boolean
+        commute_mode:
+          type: string
+        commute_minutes_per_day:
+          type: integer
+        outdoor_work:
+          type: boolean
+        home_size_sqm:
+          type: number
+        has_purifier:
+          type: boolean
+        purifier_cadr_m3h:
+          type: number
+        has_ac:
+          type: boolean
+        cooking_fuel:
+          type: string
+        budget_tier:
+          type: string
+        language:
+          type: string
+        briefing_time:
+          type: string
+
+    ConsentRequest:
+      type: object
+      required: [type, version, granted]
+      properties:
+        type:
+          type: string
+          enum: [health_flags, precise_location, notifications]
+        version:
+          type: string
+        granted:
+          type: boolean
+
+    ConsentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        type:
+          type: string
+        granted:
+          type: boolean
+
+    AirCurrentResponse:
+      type: object
+      required: [aqi, category, dominant_pollutant, pm25, pm10, station, confidence, observed_at, stale]
+      properties:
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+            geohash:
+              type: string
+        aqi:
+          type: integer
+        category:
+          type: string
+        dominant_pollutant:
+          type: string
+        pm25:
+          type: number
+        pm10:
+          type: number
+        no2:
+          type: number
+        o3:
+          type: number
+        so2:
+          type: number
+        co:
+          type: number
+        station:
+          type: object
+          properties:
+            name:
+              type: string
+            distance_km:
+              type: number
+            source:
+              type: string
+        confidence:
+          $ref: '#/components/schemas/ConfidenceLevel'
+        observed_at:
+          type: string
+        stale:
+          type: boolean
+
+    ForecastPoint:
+      type: object
+      required: [valid_at, aqi, aqi_category, pm25, pm10]
+      properties:
+        valid_at:
+          type: string
+        aqi:
+          type: integer
+        aqi_category:
+          type: string
+        pm25:
+          type: number
+        pm10:
+          type: number
+        wind_speed_ms:
+          type: number
+        humidity_pct:
+          type: number
+        temp_c:
+          type: number
+
+    AirForecastResponse:
+      type: object
+      required: [geohash, issued_at, points]
+      properties:
+        geohash:
+          type: string
+        issued_at:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForecastPoint'
+
+    RiskResponse:
+      type: object
+      required: [advice_level, worst_aqi, worst_category, rule_id, mandatory_actions, evaluated_at]
+      properties:
+        advice_level:
+          $ref: '#/components/schemas/AdviceLevel'
+        worst_aqi:
+          type: integer
+        worst_category:
+          type: string
+        rule_id:
+          type: string
+        mandatory_actions:
+          type: array
+          items:
+            type: string
+        grap_stage:
+          type: string
+        evaluated_at:
+          type: string
+
+    PlanBlock:
+      type: object
+      required: [start, end, type, note]
+      properties:
+        start:
+          type: string
+        end:
+          type: string
+        type:
+          type: string
+        note:
+          type: string
+        reason:
+          type: string
+        benefit:
+          type: string
+        severity:
+          $ref: '#/components/schemas/AdviceLevel'
+
+    PlanResponse:
+      type: object
+      required: [date, best_outdoor_window, blocks]
+      properties:
+        date:
+          type: string
+        best_outdoor_window:
+          type: object
+          properties:
+            start:
+              type: string
+            end:
+              type: string
+            pm25:
+              type: number
+            reason:
+              type: string
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBlock'
+
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        conversation_id:
+          type: string
+
+    Citation:
+      type: object
+      required: [id, title, publisher, url]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        publisher:
+          type: string
+        url:
+          type: string
+        published:
+          type: string
+
+    ActionRecommendation:
+      type: object
+      required: [title, why]
+      properties:
+        title:
+          type: string
+        why:
+          type: string
+        impact:
+          type: object
+          properties:
+            text:
+              type: string
+            value:
+              type: number
+            unit:
+              type: string
+            formula_id:
+              type: string
+        cost_tier:
+          type: string
+          enum: [free, low, mid, high]
+        citations:
+          type: array
+          items:
+            type: string
+
+    AgentResponse:
+      type: object
+      required: [advice_level, headline, summary, actions, citations, disclaimer]
+      properties:
+        advice_level:
+          $ref: '#/components/schemas/AdviceLevel'
+        headline:
+          type: string
+        summary:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionRecommendation'
+        plan_blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanBlock'
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+        uncertainty_note:
+          type: string
+          nullable: true
+        disclaimer:
+          type: string
+        followups:
+          type: array
+          items:
+            type: string
+        symptom_escalation:
+          type: boolean
+          default: false
+        limited_mode:
+          type: boolean
+          default: false
+
+    ImpactEstimateRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [wear_mask, run_purifier, ventilation_timing, commute_switch, avoid_outdoor_exercise, cooking_ventilation]
+        params:
+          type: object
+
+    ImpactResult:
+      type: object
+      required: [value, unit, assumptions, confidence, formula_id]
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+        before:
+          type: number
+          nullable: true
+        after:
+          type: number
+          nullable: true
+        reduction_pct:
+          type: number
+          nullable: true
+        assumptions:
+          type: array
+          items:
+            type: string
+        confidence:
+          $ref: '#/components/schemas/ConfidenceLevel'
+        formula_id:
+          type: string
+
+    LogActionRequest:
+      type: object
+      required: [action_type]
+      properties:
+        action_type:
+          type: string
+        params:
+          type: object
+
+    LogActionResponse:
+      type: object
+      required: [success, exposure_delta_ugm3h, co2_saved_kg, clean_air_score]
+      properties:
+        success:
+          type: boolean
+        exposure_delta_ugm3h:
+          type: number
+        co2_saved_kg:
+          type: number
+        clean_air_score:
+          type: integer
+
+    DashboardResponse:
+      type: object
+      required: [clean_air_score, streak_days, cigarette_equiv_avoided, co2_saved_kg, exposure_trend]
+      properties:
+        clean_air_score:
+          type: integer
+        streak_days:
+          type: integer
+        cigarette_equiv_avoided:
+          type: number
+        cigarette_disclaimer:
+          type: string
+        co2_saved_kg:
+          type: number
+        exposure_reduction_pct:
+          type: number
+        exposure_trend:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              actual_ugm3h:
+                type: number
+              baseline_ugm3h:
+                type: number
+        recent_actions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              action_type:
+                type: string
+              logged_at:
+                type: string
+              exposure_delta:
+                type: number
+
+    NotificationSettings:
+      type: object
+      properties:
+        morning_briefing:
+          type: boolean
+          default: true
+        briefing_time:
+          type: string
+          default: "06:30"
+        threshold_alerts:
+          type: boolean
+          default: true
+        grap_alerts:
+          type: boolean
+          default: true
+        quiet_hours_start:
+          type: string
+          default: "22:00"
+        quiet_hours_end:
+          type: string
+          default: "06:00"
+
+    PushSubscriptionRequest:
+      type: object
+      required: [endpoint]
+      properties:
+        endpoint:
+          type: string
+        keys:
+          type: object
+
+    HealthResponse:
+      type: object
+      required: [status, timestamp, dependencies]
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+        dependencies:
+          type: object
+          properties:
+            database:
+              type: string
+            redis:
+              type: string
+            llm:
+              type: string
+            weather_api:
+              type: string

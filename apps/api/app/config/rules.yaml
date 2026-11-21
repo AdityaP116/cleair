@@ -1,0 +1,151 @@
+# Rule Engine Configuration (SRS B8)
+# Maps AQI Category x Vulnerability Class to Advice Level
+
+version: "1.0.0"
+
+aqi_categories:
+  - name: "Good"
+    min: 0
+    max: 50
+  - name: "Satisfactory"
+    min: 51
+    max: 100
+  - name: "Moderate"
+    min: 101
+    max: 200
+  - name: "Poor"
+    min: 201
+    max: 300
+  - name: "Very Poor"
+    min: 301
+    max: 400
+  - name: "Severe"
+    min: 401
+    max: 500
+
+vulnerability_flags:
+  - has_child
+  - has_elderly
+  - is_pregnant
+  - has_respiratory_condition
+  - has_heart_condition
+
+matrix:
+  Good:
+    GENERAL: NORMAL
+    SENSITIVE: NORMAL
+  Satisfactory:
+    GENERAL: NORMAL
+    SENSITIVE: NORMAL
+  Moderate:
+    GENERAL: NORMAL
+    SENSITIVE: CAUTION
+  Poor:
+    GENERAL: CAUTION
+    SENSITIVE: HIGH
+  Very Poor:
+    GENERAL: HIGH
+    SENSITIVE: SEVERE
+  Severe:
+    GENERAL: SEVERE
+    SENSITIVE: EMERGENCY
+
+mandatory_actions:
+  NORMAL:
+    en:
+      - "Air quality is acceptable. Normal outdoor activity can be maintained."
+    hi:
+      - "हवा की गुणवत्ता संतोषजनक है। सामान्य बाहरी गतिविधियाँ जारी रखी जा सकती हैं।"
+    mr:
+      - "हवेची गुणवत्ता समाधानकारक आहे. सामान्य बाहेरील हालचाली सुरू ठेवता येतील."
+  CAUTION:
+    en:
+      - "Reduce prolonged outdoor exertion."
+      - "Shift outdoor exercise to the best forecast window."
+      - "Keep rescue medicines handy if prescribed."
+    hi:
+      - "लंबे समय तक बाहर भारी व्यायाम कम करें।"
+      - "बाहरी व्यायाम को दिन के सबसे सुरक्षित समय पर करें।"
+      - "यदि निर्धारित दवाएं हैं तो उन्हें पास रखें।"
+    mr:
+      - "बाहेर जास्त वेळ कठीण व्यायाम करणे टाळा."
+      - "व्यायाम दिवसाच्या सर्वात सुरक्षित वेळेत हलवा."
+      - "नेहमीची औषधे जवळ ठेवा."
+  HIGH:
+    en:
+      - "Avoid outdoor exercise."
+      - "Use a well-fitted N95/FFP2 mask when going out."
+      - "Keep windows closed during peak pollution hours."
+      - "Run an air purifier if available."
+    hi:
+      - "बाहर व्यायाम करने से बचें।"
+      - "बाहर जाते समय सही फिटिंग वाला N95/FFP2 मास्क पहनें।"
+      - "प्रदूषण के चरम समय खिड़कियां बंद रखें।"
+      - "यदि उपलब्ध हो तो एयर प्यूरीफायर चलाएं।"
+    mr:
+      - "बाहेरील व्यायाम टाळा."
+      - "बाहेर पडताना योग्य आकाराचा N95/FFP2 मास्क वापरा."
+      - "प्रदूषणाच्या पीक वेळेत खिडक्या बंद ठेवा."
+      - "शक्य असल्यास एअर प्युरिफायर वापरा."
+  SEVERE:
+    en:
+      - "Avoid non-essential outdoor activity, especially children and elderly."
+      - "Wear a certified N95/FFP2 mask for any essential trip."
+      - "Stay in a sealed indoor space with air purifier active."
+      - "Consider remote school or work if available."
+      - "Watch for respiratory symptoms."
+    hi:
+      - "अनावश्यक बाहर निकलना टालें, विशेषकर बच्चे और बुजुर्ग।"
+      - "अनिवार्य काम के लिए केवल प्रमाणित N95/FFP2 मास्क पहनकर ही जाएं।"
+      - "कमरे बंद रखें और प्यूरीफायर चलाएं।"
+      - "यदि संभव हो तो वर्क/स्कूल फ्रॉम होम चुनें।"
+      - "खांसी और सांस के लक्षणों पर नजर रखें।"
+    mr:
+      - "गरजेशिवाय बाहेर जाणे टाळा, विशेषतः मुले आणि वृद्ध."
+      - "आवश्यक प्रवासासाठी प्रमाणित N95/FFP2 मास्क वापरा."
+      - "खोली बंद ठेवा आणि प्युरिफायर चालू ठेवा."
+      - "शक्य असल्यास घरून काम किंवा शाळा निवडा."
+      - "श्वसनाच्या लक्षणांवर लक्ष ठेवा."
+  EMERGENCY:
+    en:
+      - "Stay indoors completely; avoid all outdoor exertion."
+      - "N95/FFP2 mask mandatory for any unavoidable emergency trips."
+      - "Run air purifier continuously in the main living or sleeping room."
+      - "Contact a doctor promptly for breathlessness, chest pain, persistent cough, or wheezing."
+    hi:
+      - "पूरी तरह घर के अंदर रहें; बाहर का सारा शारीरिक श्रम बंद करें।"
+      - "अपरिहार्य आपात स्थिति में बाहर निकलने पर N95/FFP2 मास्क अनिवार्य रूप से पहनें।"
+      - "मुख्य कमरे में एयर प्यूरीफायर लगातार चलाएं।"
+      - "सांस फूलने, सीने में दर्द या तेज खांसी होने पर तुरंत डॉक्टर से संपर्क करें।"
+    mr:
+      - "पूर्णपणे घरातच राहा; बाहेरील सर्व श्रम टाळा."
+      - "अत्यंत आवश्यक कामासाठी बाहेर पडताना N95/FFP2 मास्क अनिवार्य आहे."
+      - "मुख्य खोलीत एअर प्युरिफायर सतत चालू ठेवा."
+      - "श्वास लागणे, छातीत दुखणे किंवा खोकला वाढल्यास त्वरित डॉक्टरांशी संपर्क साधा."
+
+symptoms_escalation:
+  keywords:
+    en:
+      - "struggling to breathe"
+      - "breathlessness"
+      - "chest pain"
+      - "blue lips"
+      - "severe wheeze"
+      - "fainting"
+      - "asthma attack"
+      - "cannot breathe"
+    hi:
+      - "सांस नहीं आ रही"
+      - "सांस फूल रही"
+      - "सीने में दर्द"
+      - "सांस लेने में तकलीफ"
+      - "बेहोश"
+    mr:
+      - "श्वास घेण्यास त्रास"
+      - "छातीत दुखणे"
+      - "दम लागणे"
+      - "श्वास अडकणे"
+  escalation_message:
+    en: "EMERGENCY HEALTH WARNING: These symptoms can be serious and life-threatening. Please seek urgent medical help immediately or contact local emergency services (112 / 102)."
+    hi: "आपातकालीन स्वास्थ्य चेतावनी: ये लक्षण गंभीर और जानलेवा हो सकते हैं। कृपया तुरंत आपातकालीन चिकित्सा सहायता लें या 112 / 102 पर संपर्क करें।"
+    mr: "तातडीची आरोग्य सूचना: ही लक्षणे गंभीर असू शकतात. कृपया त्वरित वैद्यकीय मदत घ्या किंवा 112 / 102 वर संपर्क साधा."

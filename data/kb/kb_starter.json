@@ -1,0 +1,71 @@
+{
+  "manifest_version": "1.0",
+  "documents": [
+    {
+      "id": "kb-who-2021",
+      "title": "WHO Global Air Quality Guidelines (2021)",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/publications/i/item/9789240034228",
+      "published": "2021-09-22",
+      "topic": ["health_effects", "guideline_values", "vulnerable_populations"],
+      "audience": ["general", "child", "elderly"],
+      "severity": ["NORMAL", "CAUTION", "HIGH", "SEVERE", "EMERGENCY"],
+      "content": "Particulate matter (PM2.5 and PM10) is capable of penetrating deep into the lungs and entering the bloodstream, causing cardiovascular, cerebrovascular and respiratory impacts. Annual mean PM2.5 should not exceed 5 ug/m3, while 24-hour mean should not exceed 15 ug/m3. Children, pregnant women, the elderly, and people with pre-existing cardiopulmonary disorders are particularly susceptible to severe health exacerbations during smog peaks."
+    },
+    {
+      "id": "kb-cpcb-aqi",
+      "title": "CPCB National Air Quality Index Categories and Health Advisories",
+      "publisher": "Central Pollution Control Board, India",
+      "url": "https://cpcb.nic.in/National-Air-Quality-Index/",
+      "published": "2015-04-17",
+      "topic": ["aqi_scale", "health_advisories", "india_standards"],
+      "audience": ["general", "sensitive"],
+      "severity": ["NORMAL", "CAUTION", "HIGH", "SEVERE", "EMERGENCY"],
+      "content": "The National AQI has six categories: Good (0-50), Satisfactory (51-100), Moderate (101-200), Poor (201-300), Very Poor (301-400), and Severe (401-500). Poor air quality causes breathing discomfort to most people on prolonged exposure. Very Poor causes respiratory illness on prolonged exposure. Severe causes respiratory effects even on healthy people and serious health impacts on people with lung/heart diseases."
+    },
+    {
+      "id": "kb-caqm-grap",
+      "title": "Graded Response Action Plan (GRAP) for NCR",
+      "publisher": "Commission for Air Quality Management (CAQM)",
+      "url": "https://caqm.nic.in/grap",
+      "published": "2023-10-06",
+      "topic": ["policy", "grap", "delhi_ncr"],
+      "audience": ["general", "school", "traffic"],
+      "severity": ["HIGH", "SEVERE", "EMERGENCY"],
+      "content": "GRAP classifies pollution into four stages: Stage I 'Poor' (AQI 201-300), Stage II 'Very Poor' (AQI 301-400), Stage III 'Severe' (AQI 401-450), and Stage IV 'Severe+' (AQI >450). Stage III and IV mandate restrictions on BS-III petrol and BS-IV diesel cars, bans on construction activities, and state directives on school closures or shifting to hybrid/online modes for classes up to standard 8 or 12."
+    },
+    {
+      "id": "kb-epa-masks",
+      "title": "Wildfire and Smog Smoke: Particle Masks and Respirators",
+      "publisher": "US EPA & CDC",
+      "url": "https://www.cdc.gov/niosh/npptl/respirators/index.html",
+      "published": "2023-05-15",
+      "topic": ["masks", "respirators", "filtration"],
+      "audience": ["general", "outdoor_workers", "sensitive"],
+      "severity": ["HIGH", "SEVERE", "EMERGENCY"],
+      "content": "Cloth masks, bandanas, and loose surgical masks do not provide reliable protection against fine PM2.5 particles because air bypasses the edges. Certified respirators such as N95, FFP2, or KN95 filter at least 94-95% of fine particulate matter when fitted snugly with no air leakage around the nose, cheeks, and chin. Users with facial hair experience significant filtration bypass."
+    },
+    {
+      "id": "kb-epa-cadr",
+      "title": "Guide to Air Cleaners in the Home: Clean Air Delivery Rate (CADR)",
+      "publisher": "US Environmental Protection Agency (EPA)",
+      "url": "https://www.epa.gov/indoor-air-quality-iaq/air-cleaners-and-air-filters-home",
+      "published": "2022-08-10",
+      "topic": ["purifiers", "cadr", "indoor_air"],
+      "audience": ["homeowners", "sensitive"],
+      "severity": ["HIGH", "SEVERE", "EMERGENCY"],
+      "content": "CADR measures the volume of filtered air delivered per unit of time (m3/h or CFM). For effective particle removal, a purifier should provide at least 4 to 5 air changes per hour (ACH) in the intended room. A practical rule of thumb is that CADR in cubic meters per hour should be roughly 2/3 times the room floor area in square meters multiplied by ceiling height, or CADR (m3/h) >= 5 * Room Volume (m3)."
+    },
+    {
+      "id": "kb-indoor-plants",
+      "title": "Indoor Air Quality and Plants: Evidence and Practical Limits",
+      "publisher": "EPA / Journal of Exposure Science & Environmental Epidemiology",
+      "url": "https://www.nature.com/articles/s41370-019-0175-9",
+      "published": "2020-03-01",
+      "topic": ["indoor_air", "plants", "myths"],
+      "audience": ["general"],
+      "severity": ["NORMAL", "CAUTION"],
+      "content": "While popular claims suggest house plants significantly purify air, rigorous scientific reviews demonstrate that natural plant metabolism cleans air thousands of times slower than simple air ventilation or a HEPA filter. Potted plants cannot replace mechanical HEPA air filtration during severe particulate smog events."
+    }
+  ]
+}

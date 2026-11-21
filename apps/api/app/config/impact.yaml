@@ -1,0 +1,65 @@
+# Impact Calculator Configuration (SRS B9)
+# All parameters marked with TODO(verify) per SRS B9 and B15 working rules.
+
+version: "1.0.0"
+
+# Inhalation rates in m3/h
+# Source: EPA Exposure Factors Handbook (heuristic defaults)
+# TODO(verify): Validate with Indian ICMR exposure averages
+inhalation_rates:
+  adult:
+    rest: 0.5
+    light: 1.0
+    exercise: 2.0
+  child:
+    rest: 0.3
+    light: 0.6
+    exercise: 1.2
+
+# Real-world effective mask filtration (filter efficiency x real-world fit)
+# Source: NIOSH / literature heuristics on real-world leakage
+# TODO(verify): Review against clinical fit trials
+mask_reduction:
+  n95_good: 0.75
+  n95_poor: 0.40
+  surgical: 0.30
+  cloth: 0.15
+
+# Indoor single-zone model constants
+# Source: EPA / ASHRAE indoor air quality guides
+# TODO(verify): Building science benchmarks for urban Indian masonry flats
+indoor_model:
+  ach_natural_closed: 0.5   # 1/h
+  ach_natural_open: 2.0     # 1/h
+  penetration_closed: 0.7   # fraction
+  penetration_open: 1.0     # fraction
+  deposition_rate_k: 0.2    # 1/h
+  cadr_floor_area_heuristic: 0.67  # CADR (m3/h) per sqm for ~5 ACH-equiv
+
+# Cigarette equivalence
+# Source: Berkeley Earth (22 ug/m3 PM2.5 24h avg ≈ 1 cigarette/day)
+# Disclaimer: "Rough comparison for intuition only. It is not a medical measurement."
+cigarette_equivalence:
+  ugm3_per_cigarette: 22.0
+  disclaimer: "Rough comparison for intuition only. It is not a medical measurement."
+
+# Commute emission factors (kg CO2 per passenger-km)
+# Source: ARAI / CPCB averages
+# TODO(verify): Local urban transit emission benchmarks
+commute_emission_factors:
+  petrol_car: 0.17
+  two_wheeler: 0.04
+  bus: 0.07
+  metro: 0.03
+  walk: 0.0
+  cycle: 0.0
+  wfh: 0.0
+
+# Banned phrases at level >= HIGH (SRS B12.2)
+banned_phrases_high_severity:
+  - "safe to go out"
+  - "safe for outdoor"
+  - "no need for a mask"
+  - "completely safe"
+  - "safe for children outside"
+  - "safe for morning walk"
