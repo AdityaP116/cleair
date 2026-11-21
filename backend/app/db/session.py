@@ -4,11 +4,12 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cleair_dev.db")
 
-# Standard synchronous SQLAlchemy engine (does not require C-extension greenlet)
+# Standard synchronous SQLAlchemy engine with timeout for SQLite concurrent access
 engine = create_engine(
     DATABASE_URL,
     echo=False,
-    future=True
+    future=True,
+    connect_args={"timeout": 15} if "sqlite" in DATABASE_URL else {}
 )
 
 # Enforce foreign key constraints in SQLite

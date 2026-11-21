@@ -71,6 +71,11 @@ def ingest_telemetry(
         )
         if not was_created:
             any_duplicate = True
+        else:
+            # Phase 4: Trigger operational alert evaluation on new readings
+            from app.modules.alerts.engine import AlertEngineService
+            alert_engine = AlertEngineService(db)
+            alert_engine.evaluate_reading_against_rules(reading)
 
         recorded_items.append(IngestionResultItem(
             measurement_type=reading.measurement_type,

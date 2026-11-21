@@ -103,4 +103,4 @@ class Zone(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     floor = relationship("Floor", back_populates="zones")
-    sensors = relationship("Sensor", back_populates="zone")
+    sensors = relationship("app.models.telemetry.Sensor", back_populates="zone")

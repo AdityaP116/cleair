@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from typing import List, Optional, Any
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Urban Air Quality Assistant (SmogSense)"
@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     
     # Environment
     ENV: str = "development"
-    DEBUG: bool = True
+    DEBUG: Any = True
     
     # Security
     SECRET_KEY: str = "dev-secret-key-change-in-production-uaqa-smogsense"

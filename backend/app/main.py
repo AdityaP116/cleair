@@ -14,7 +14,9 @@ from app.api.routes import (
     exposure,
     chat,
     telemetry,
-    facilities
+    facilities,
+    alerts,
+    work_orders
 )
 
 # Auto-create tables for local development database
@@ -58,3 +60,5 @@ app.include_router(chat.router, prefix=f"{settings.API_V1_STR}/chat", tags=["AI 
 # Register Phase 2 Institutional Telemetry & Facility routes
 app.include_router(telemetry.router, prefix=f"{settings.API_V1_STR}/telemetry", tags=["IoT Ingestion & Telemetry"])
 app.include_router(facilities.router, prefix=f"{settings.API_V1_STR}/facilities", tags=["Institutional Facilities & Zones"])
+app.include_router(alerts.router, prefix=f"{settings.API_V1_STR}/alerts", tags=["Operational Alerts"])
+app.include_router(work_orders.router, prefix=f"{settings.API_V1_STR}", tags=["Work Orders & Interventions"])

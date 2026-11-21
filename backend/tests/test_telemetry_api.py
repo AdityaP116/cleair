@@ -4,22 +4,39 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timezone
 
 from app.main import app
-from app.db.session import SessionLocal
+from app.db.base import Base
+from app.db.session import SessionLocal, get_db
 from app.repositories.facilities import FacilityRepository
 
 client = TestClient(app)
 
-def test_telemetry_ingestion_api_flow():
+@pytest.fixture
+def test_db():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+    test_engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=False
+    )
+    Base.metadata.create_all(test_engine)
+    SessionMaker = sessionmaker(bind=test_engine)
+    session = SessionMaker()
+    yield session
+    session.close()
+
+def test_telemetry_ingestion_api_flow(test_db):
+    app.dependency_overrides[get_db] = lambda: test_db
     # Setup test hierarchy with unique serial number per run
     unique_suffix = str(uuid.uuid4())[:6]
-    db = SessionLocal()
-    repo = FacilityRepository(db)
+    repo = FacilityRepository(test_db)
     org = repo.get_or_create_pilot_organization(code=f"API-TEST-ORG-{unique_suffix}")
     site = repo.create_site(org.id, name="Bandra Academic Campus", city="Mumbai")
     _, _, z = repo.create_hierarchy_node(site.id, "Main Block", 1, "Auditorium")
     sensor, secret_key = repo.register_sensor(z.id, serial_number=f"API-SN-{unique_suffix}")
-    db.commit()
-    db.close()
+    test_db.commit()
 
     # 1. Ingest valid telemetry via API
     now_iso = datetime.now(timezone.utc).isoformat()
