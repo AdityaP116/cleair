@@ -20,6 +20,7 @@ def get_default_site(db: Session = Depends(get_db)):
         db.commit()
     return {
         "site_id": site.id,
+        "organization_id": org.id,
         "name": site.name,
         "city": site.city,
         "organization_name": org.name,

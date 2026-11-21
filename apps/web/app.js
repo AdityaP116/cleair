@@ -469,6 +469,8 @@ async function loadWorkOrders() {
         actionBtn = `<button onclick="startWorkOrder('${o.id}')" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 px-2 py-1 rounded text-[10px] font-semibold">Start</button>`;
       } else if (o.status === "IN_PROGRESS") {
         actionBtn = `<button onclick="resolveWorkOrderModal('${o.id}')" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded text-[10px] font-semibold">Complete</button>`;
+      } else if (o.status === "RESOLVED") {
+        actionBtn = `<button onclick="viewVerification('${o.id}')" class="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 px-2 py-1 rounded text-[10px] font-semibold">Verify</button>`;
       } else {
         actionBtn = `<span class="text-slate-500 text-[10px]">Closed</span>`;
       }
@@ -541,6 +543,26 @@ window.resolveWorkOrderModal = async function(orderId) {
   }
 };
 
+window.viewVerification = async function(orderId) {
+  try {
+    const res = await fetch(`${API_BASE}/work-orders/${orderId}/verification?window_minutes=60`);
+    if (!res.ok) return;
+    const v = await res.json();
+    let msg = `[Before/After Verification Report]\nOrder: ${v.title || orderId}\nAnchor Time: ${new Date(v.anchor_timestamp).toLocaleTimeString()}\nIntervention: ${v.intervention?.type || 'Corrective action'}\n\n`;
+    if (v.metrics) {
+      for (const [k, m] of Object.entries(v.metrics)) {
+        if (m.pre_mean !== undefined && m.post_mean !== undefined) {
+          msg += `${k}: ${m.pre_mean} -> ${m.post_mean} ${m.unit} (Delta: ${m.delta} ${m.unit}, ${m.percent_change}% [${m.direction}])\n`;
+        }
+      }
+    }
+    msg += `\nMMR Ambient Baseline Context:\nAmbient PM2.5: ${v.outdoor_context?.ambient_pm25} µg/m³\nAmbient PM10: ${v.outdoor_context?.ambient_pm10} µg/m³\n\nIntegrity Notice: ${v.epistemic_disclaimer}`;
+    alert(msg);
+  } catch (err) {
+    console.error("Verification lookup failed:", err);
+  }
+};
+
 // Create Work Order Form Handler
 const createWorkOrderForm = document.getElementById("createWorkOrderForm");
 if (createWorkOrderForm) {
@@ -584,6 +606,49 @@ const btnRefreshWorkOrders = document.getElementById("btnRefreshWorkOrders");
 if (btnRefreshWorkOrders) {
   btnRefreshWorkOrders.addEventListener("click", loadWorkOrders);
 }
+
+// Institutional Reports & Exports
+window.downloadTelemetryCSV = function() {
+  if (!currentSiteId) return;
+  window.open(`${API_BASE}/reports/site/${currentSiteId}/export/csv?days=7`, "_blank");
+};
+
+window.viewExecutiveReport = async function() {
+  if (!currentSiteId) return;
+  try {
+    const res = await fetch(`${API_BASE}/reports/site/${currentSiteId}/summary?days=7`);
+    if (!res.ok) return;
+    const rep = await res.json();
+
+    let text = `=========================================\n`;
+    text += `INSTITUTIONAL AIR QUALITY OPERATIONS REPORT\n`;
+    text += `Site: ${rep.site_name} (${rep.city})\n`;
+    text += `Period: Last ${rep.report_period_days} Days\n`;
+    text += `=========================================\n\n`;
+    text += `1. MONITORING COVERAGE:\n`;
+    text += `   - Total Physical Zones: ${rep.monitoring_coverage.total_zones}\n`;
+    text += `   - Instrumented Zones: ${rep.monitoring_coverage.instrumented_zones} (${rep.monitoring_coverage.coverage_percent}%)\n\n`;
+    text += `2. TELEMETRY VOLUME & DATA INTEGRITY:\n`;
+    text += `   - Total Readings Ingested: ${rep.telemetry_volume.total_readings}\n`;
+    text += `   - Valid Quality Rate: ${rep.telemetry_volume.data_integrity_percent}%\n\n`;
+    text += `3. ALERT RESOLUTION:\n`;
+    text += `   - Total Triggered: ${rep.alerts_summary.total_triggered}\n`;
+    text += `   - Critical Alerts: ${rep.alerts_summary.critical_count}\n`;
+    text += `   - Resolution Rate: ${rep.alerts_summary.resolution_rate_percent}%\n\n`;
+    text += `4. CORRECTIVE ACTIONS:\n`;
+    text += `   - Total Work Orders: ${rep.operations_and_interventions.total_work_orders}\n`;
+    text += `   - Completed Orders: ${rep.operations_and_interventions.completed_work_orders}\n`;
+    text += `   - Physical Interventions: ${rep.operations_and_interventions.total_physical_interventions}\n\n`;
+    text += `5. ZONE COMPLIANCE BREAKDOWN:\n`;
+    rep.zone_compliance.forEach(z => {
+      text += `   • ${z.name}: PM2.5 Avg = ${z.observed_pm25_mean !== null ? z.observed_pm25_mean + ' µg/m³' : 'N/A'} (Target ≤ ${z.target_pm25_max}) | CO2 Avg = ${z.observed_co2_mean !== null ? z.observed_co2_mean + ' ppm' : 'N/A'}\n`;
+    });
+
+    alert(text);
+  } catch (err) {
+    console.error("Report lookup failed:", err);
+  }
+};
 
 function escapeHtml(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

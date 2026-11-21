@@ -12,7 +12,7 @@ router = APIRouter(prefix="/work-orders", tags=["Work Orders & Interventions"])
 
 class CreateWorkOrderRequest(BaseModel):
     site_id: str
-    organization_id: str
+    organization_id: Optional[str] = None
     title: str = Field(..., max_length=255)
     description: str
     priority: WorkOrderPriority = WorkOrderPriority.MEDIUM
@@ -44,9 +44,17 @@ class RecordInterventionRequest(BaseModel):
 @router.post("", status_code=201)
 def create_work_order(req: CreateWorkOrderRequest, db: Session = Depends(get_db)):
     service = WorkOrderService(db)
+    org_id = req.organization_id
+    if not org_id:
+        from app.models.institutional import Site
+        site = db.query(Site).filter(Site.id == req.site_id).first()
+        if not site:
+            raise HTTPException(status_code=404, detail="Site not found")
+        org_id = site.organization_id
+
     wo = service.create_work_order(
         site_id=req.site_id,
-        organization_id=req.organization_id,
+        organization_id=org_id,
         title=req.title,
         description=req.description,
         priority=req.priority,
@@ -195,3 +203,12 @@ def record_intervention(work_order_id: str, req: RecordInterventionRequest, db: 
         "performed_by": rec.performed_by,
         "completed_at": rec.completed_at.isoformat()
     }
+
+@router.get("/{work_order_id}/verification")
+def get_work_order_verification(work_order_id: str, window_minutes: int = 60, db: Session = Depends(get_db)):
+    from app.modules.operations.verification import VerificationAnalyticsService
+    service = VerificationAnalyticsService(db)
+    result = service.compute_work_order_verification(work_order_id=work_order_id, window_minutes=window_minutes)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result

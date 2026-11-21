@@ -396,18 +396,58 @@
 
     <!-- View 6: Privacy & Data Governance (F11, FR-PRV) -->
     <section id="view-privacy" class="view-panel space-y-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg mx-auto space-y-4">
-        <div>
-          <h2 class="text-lg font-bold text-white">Data Integrity & Governance</h2>
-          <p class="text-xs text-slate-400">Pilot deployment controls and immutable historical telemetry rules</p>
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Governance Controls -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Data Integrity & Governance</h2>
+            <p class="text-xs text-slate-400">Pilot deployment controls and immutable historical telemetry rules</p>
+          </div>
+
+          <div class="space-y-3 text-xs text-slate-300">
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+              <strong>Historical Integrity Guaranteed:</strong> Sensor readings are immutable. Soft deletion of zones or decommissioned hardware sets associations to NULL without purging baseline history.
+            </div>
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+              <strong>Cryptographic Sensor Keys:</strong> 256-bit entropy API keys, salted SHA-256 verification, with immediate revocation capabilities.
+            </div>
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
+              <strong>Clear Provenance:</strong> Measurements distinguish MEASURED hardware telemetry from SIMULATED benchmark sets.
+            </div>
+          </div>
         </div>
 
-        <div class="space-y-3 text-xs text-slate-300">
-          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <strong>Historical Integrity Guaranteed:</strong> Sensor readings are immutable. Soft deletion of zones or decommissioned hardware sets associations to NULL without purging baseline history.
+        <!-- Institutional Reports & Exports -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white">Institutional Reports & Export</h2>
+            <p class="text-xs text-slate-400">Generate executive compliance summaries and download telemetry datasets</p>
           </div>
-          <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-            <strong>Clear Provenance:</strong> Measurements distinguish MEASURED hardware telemetry from SIMULATED benchmark sets.
+
+          <div class="space-y-3 text-xs">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-slate-200 block text-sm">Download Raw Telemetry (CSV)</strong>
+                <span class="text-slate-400 text-[11px]">Clean time-series export with sensor IDs, timestamps, quality flags, and units.</span>
+              </div>
+              <button onclick="downloadTelemetryCSV()" class="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 px-3 py-2 rounded-xl text-xs font-semibold shrink-0">
+                📥 Export CSV
+              </button>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <strong class="text-slate-200 block text-sm">Institutional Operations Summary</strong>
+                <span class="text-slate-400 text-[11px]">7-day compliance report: coverage %, alert resolution rate, and zone benchmarks.</span>
+              </div>
+              <button onclick="viewExecutiveReport()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold shrink-0">
+                📄 View Summary
+              </button>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-slate-500 italic">
+            Compliant with institutional environmental compliance auditing frameworks.
           </div>
         </div>
       </div>
