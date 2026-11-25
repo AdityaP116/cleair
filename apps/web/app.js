@@ -59,8 +59,12 @@ if (btnThemeToggle) {
 document.querySelectorAll(".nav-item").forEach(item => {
   item.addEventListener("click", (e) => {
     e.preventDefault();
-    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-    item.classList.add("active");
+    document.querySelectorAll(".nav-item").forEach(i => {
+      i.classList.remove("active", "bg-deep-teal", "text-white", "shadow-2xs");
+      i.classList.add("text-text-secondary");
+    });
+    item.classList.add("active", "bg-deep-teal", "text-white", "shadow-2xs");
+    item.classList.remove("text-text-secondary");
 
     const targetView = item.getAttribute("data-view");
     document.querySelectorAll(".view-panel").forEach(p => p.classList.add("hidden"));
@@ -69,7 +73,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
 
     // Close mobile drawer if open
     appSidebar.classList.remove("mobile-open");
-    if (sidebarOverlay) sidebarOverlay.classList.remove("active");
+    if (sidebarOverlay) sidebarOverlay.classList.add("hidden");
   });
 });
 
