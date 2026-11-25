@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from app.modules.safety.rules import safety_engine
 from app.modules.safety.validator import output_validator
 from app.modules.impact.interventions import interventions_calc
@@ -6,7 +6,7 @@ from app.modules.impact.purifier import purifier_model
 from app.modules.knowledge.retrieval import knowledge_retrieval
 
 class AgentOrchestrator:
-    def process_turn(self, message: str, profile: Dict[str, Any], current_aqi: int = 348) -> Dict[str, Any]:
+    def process_turn(self, message: str, profile: Dict[str, Any], current_aqi: int = 348, air_reading: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         lang = profile.get("language", "en")
 
         # 1. Symptom check (SR-02 / B8.6)

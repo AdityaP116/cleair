@@ -8,7 +8,10 @@ from app.repositories.memory import repo
 router = APIRouter()
 
 @router.get("/current")
-def get_current(lat: Optional[float] = 28.6139, lon: Optional[float] = 77.2090):
+def get_current(
+    lat: float = Query(28.6139, ge=-90.0, le=90.0),
+    lon: float = Query(77.2090, ge=-180.0, le=180.0),
+):
     return air_service.get_current(lat, lon)
 
 @router.get("/risk")
