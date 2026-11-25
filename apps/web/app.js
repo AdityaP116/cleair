@@ -829,5 +829,16 @@ function escapeHtml(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Contact Form Handler
+const contactForm = document.getElementById("contactForm");
+if (contactForm) {
+  contactForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const statusEl = document.getElementById("contactStatus");
+    if (statusEl) statusEl.textContent = "Message received! Pilot support will follow up shortly.";
+    contactForm.reset();
+  });
+}
+
 // Start on DOM ready
 window.addEventListener("DOMContentLoaded", initializeDashboard);

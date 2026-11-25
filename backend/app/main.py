@@ -1,9 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import datetime
 import os
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse, Response, HTMLResponse, JSONResponse
 
 from app.config import settings
 from app.db.base import Base
@@ -80,3 +80,21 @@ if os.path.exists(web_dir):
     @app.get("/app.js")
     def serve_frontend_js():
         return FileResponse(os.path.join(web_dir, "app.js"))
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots_txt():
+    return "User-agent: *\nAllow: /\nSitemap: http://127.0.0.1:8000/sitemap.xml\n"
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>http://127.0.0.1:8000/</loc></url></urlset>'
+    return Response(content=xml, media_type="application/xml")
+
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc):
+    if request.url.path.startswith("/v1/"):
+        return JSONResponse(status_code=404, content={"detail": "Not Found"})
+    return HTMLResponse(
+        content="<!DOCTYPE html><html><head><title>404 — Cleair</title></head><body style='font-family:sans-serif;text-align:center;padding:60px;background:#F4F8F6;color:#102A26;'><h1>404 — Page Not Found</h1><p>The requested page does not exist.</p><a href='/' style='color:#0F766E;font-weight:bold;'>Return to Cleair Dashboard</a></body></html>",
+        status_code=404
+    )

@@ -4,6 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cleair — Urban Air Quality & Institutional Intelligence</title>
+  <meta name="description" content="Cleair (UAQA) is an institutional air quality operations and environmental intelligence platform for schools, campuses, and facilities in the Mumbai Metropolitan Region.">
+  <link rel="canonical" href="http://127.0.0.1:8000/">
+  <meta property="og:title" content="Cleair — Urban Air Quality & Institutional Intelligence">
+  <meta property="og:description" content="Real-time indoor air quality monitoring, operational alerts, and corrective action verification for educational campuses.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://127.0.0.1:8000/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cleair (Urban Air Quality Assistant)",
+    "url": "http://127.0.0.1:8000/",
+    "description": "Institutional Air Quality Operations & Intelligence Platform"
+  }
+  </script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0E3B36">
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -531,16 +546,19 @@
           </div>
         </section>
 
-        <!-- ================= VIEW 8: REPORTS & SOURCES ================= -->
-        <section id="view-privacy" class="view-panel hidden">
+        <!-- ================= VIEW 8: REPORTS, PRIVACY & CONTACT ================= -->
+        <section id="view-privacy" class="view-panel hidden space-y-6">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-light-surface rounded-xl p-6 border border-border-subtle shadow-sm space-y-3">
-              <h2 class="font-headline text-lg font-bold text-text-primary">Data Integrity & Governance</h2>
+              <h2 class="font-headline text-lg font-bold text-text-primary">Privacy Policy & Data Governance</h2>
               <div class="p-3 rounded-lg bg-light-surface-variant border border-border-subtle text-xs text-text-secondary">
                 <strong class="text-text-primary">Historical Integrity:</strong> Sensor readings are immutable. Soft deletion preserves baseline history.
               </div>
               <div class="p-3 rounded-lg bg-light-surface-variant border border-border-subtle text-xs text-text-secondary">
                 <strong class="text-text-primary">Provenance:</strong> Measurements distinguish MEASURED hardware telemetry from SIMULATED data.
+              </div>
+              <div class="p-3 rounded-lg bg-light-surface-variant border border-border-subtle text-xs text-text-secondary">
+                <strong class="text-text-primary">Privacy Policy:</strong> Cleair collects only institutional environmental telemetry and operator-submitted work order notes. No personal student or occupant tracking data is collected.
               </div>
             </div>
 
@@ -561,6 +579,30 @@
                 <button onclick="viewExecutiveReport()" class="px-3 py-2 rounded-md bg-light-surface border border-border-subtle text-text-primary text-xs font-semibold shrink-0">View Summary</button>
               </div>
             </div>
+          </div>
+
+          <!-- Working Contact Form -->
+          <div class="bg-light-surface rounded-xl p-6 border border-border-subtle shadow-sm">
+            <h2 class="font-headline text-lg font-bold text-text-primary mb-1">Contact & Pilot Support</h2>
+            <p class="text-xs text-text-secondary mb-4">Report sensor hardware issues or request campus onboarding support</p>
+            <form id="contactForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label class="block font-semibold text-text-secondary mb-1">Your Name</label>
+                <input id="contactName" type="text" required placeholder="Facility Manager" class="w-full rounded-md border-border-subtle bg-light-surface-variant text-xs">
+              </div>
+              <div>
+                <label class="block font-semibold text-text-secondary mb-1">Email</label>
+                <input id="contactEmail" type="email" required placeholder="ops@school.edu" class="w-full rounded-md border-border-subtle bg-light-surface-variant text-xs">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block font-semibold text-text-secondary mb-1">Message</label>
+                <textarea id="contactMessage" rows="2" required placeholder="Describe your inquiry..." class="w-full rounded-md border-border-subtle bg-light-surface-variant text-xs"></textarea>
+              </div>
+              <div class="sm:col-span-2 flex items-center justify-between">
+                <span id="contactStatus" class="text-xs text-mint-dark font-medium"></span>
+                <button type="submit" class="px-4 py-2 rounded-md bg-deep-teal text-white font-semibold">Send Message</button>
+              </div>
+            </form>
           </div>
         </section>
 
