@@ -668,17 +668,16 @@ if (ingestForm) {
     logTerminal(`Transmitting authenticated packet for ${matchedZone ? matchedZone.name : 'Zone'}...`);
 
     try {
-      const res = await fetch(`${API_BASE}/telemetry/ingest`, {
+      const res = await fetch(`${API_BASE}/telemetry/simulate`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-sensor-key": "sq_live_fbac4e84_FPL3EqRtOpUAtKr_IM9CS5Lmc6K0y4v7o0lKzOZt-DQ"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (res.ok) {
-        logTerminal(`[200 OK] Ingested ${data.processed_count} readings (Packet ID: ${data.idempotency_key})`);
+        logTerminal(`[200 OK] Simulated ${data.readings_recorded} readings (Packet ID: ${data.idempotency_key})`);
         loadZones();
         loadAlerts();
       } else {

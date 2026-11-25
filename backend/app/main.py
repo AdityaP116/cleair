@@ -41,6 +41,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Sliding-window rate-limiting middleware (120 req/min per client IP)
+from collections import defaultdict
+import time
+_rate_limit_store = defaultdict(list)
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    window = _rate_limit_store[client_ip]
+    _rate_limit_store[client_ip] = [t for t in window if now - t < 60]
+    if len(_rate_limit_store[client_ip]) >= 120:
+        return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
+    _rate_limit_store[client_ip].append(now)
+    return await call_next(request)
+
 # Health endpoint
 @app.get(f"{settings.API_V1_STR}/health")
 def health_check():

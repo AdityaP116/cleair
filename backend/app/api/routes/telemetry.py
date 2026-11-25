@@ -117,3 +117,34 @@ def get_sensor_status(sensor_id: str, db: Session = Depends(get_db)):
         last_seen_at=sensor.last_seen_at,
         expected_interval_sec=sensor.expected_interval_sec
     )
+
+@router.post("/simulate")
+def simulate_telemetry_server_side(
+    payload: TelemetryIngestPayload,
+    db: Session = Depends(get_db)
+):
+    """
+    Server-side simulation endpoint so client-side JS never needs hardware API keys.
+    """
+    repo = FacilityRepository(db)
+    sensor = repo.get_sensor(payload.sensor_id)
+    if not sensor:
+        raise HTTPException(status_code=404, detail=f"Sensor ID '{payload.sensor_id}' not found")
+    site_id = sensor.zone.floor.building.site_id if (sensor.zone and sensor.zone.floor and sensor.zone.floor.building) else repo.create_site(repo.get_or_create_pilot_organization().id).id
+    results = []
+    for m in payload.measurements:
+        rec, _ = repo.ingest_reading(
+            sensor_id=sensor.id,
+            zone_id=sensor.zone_id,
+            site_id=site_id,
+            measurement_type=m.type,
+            value=m.value,
+            sensor_timestamp=payload.timestamp,
+            idempotency_key=f"{payload.idempotency_key}_{m.type}",
+            provenance="SIMULATED",
+            raw_payload={"simulated_server_side": True}
+        )
+        if rec:
+            results.append({"measurement_type": m.type, "value": m.value, "unit": rec.measurement_unit, "quality_status": rec.quality_status})
+    db.commit()
+    return {"success": True, "sensor_id": sensor.id, "readings_recorded": len(results), "idempotency_key": payload.idempotency_key, "results": results}
