@@ -1,7 +1,55 @@
-// UAQA Enterprise Frontend Application Logic
+// Cleair / UAQA Frontend Application Logic
 // Clean ES6 Architecture - Zero External NPM Dependencies
+//
+// CHAT API CONTRACT (verified against backend/app/api/routes/auth.py & chat.py):
+//   1. POST /v1/session -> { session_token: string, user_id: string }
+//   2. POST /v1/chat
+//      Headers: { "Content-Type": "application/json", "x-session-token": "<session_token>" }
+//      Body:    { "message": "<user_text>", "context"?: object }
+//      200 OK:  Structured assistant response JSON
+//      401:     Missing/invalid x-session-token -> re-acquire session and retry once
+//      422:     Validation error -> show friendly validation message
+//      429:     Rate limit exceeded -> show slow-down notice
 
 const API_BASE = "http://127.0.0.1:8000/v1";
+
+async function ensureSession(forceRefresh = false) {
+  let token = !forceRefresh ? sessionStorage.getItem("cleair_session_token") : null;
+  if (token) return token;
+  const res = await fetch(`${API_BASE}/session`, { method: "POST" });
+  if (!res.ok) throw new Error(`Session creation failed (${res.status})`);
+  const data = await res.json();
+  sessionStorage.setItem("cleair_session_token", data.session_token);
+  return data.session_token;
+}
+
+async function sendChat(message, context = {}) {
+  let token = await ensureSession(false);
+  let res = await fetch(`${API_BASE}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-session-token": token },
+    body: JSON.stringify({ message, ...context })
+  });
+  if (res.status === 401) {
+    token = await ensureSession(true);
+    res = await fetch(`${API_BASE}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-session-token": token },
+      body: JSON.stringify({ message, ...context })
+    });
+  }
+  if (res.status === 422) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Invalid request: ${err.detail?.[0]?.msg || "Please check your message."}`);
+  }
+  if (res.status === 429) {
+    throw new Error("Too many requests. Please slow down and try again in a minute.");
+  }
+  if (!res.ok) {
+    throw new Error(`Server error (${res.status}). Please try again.`);
+  }
+  return res.json();
+}
 let currentSite = null;
 let currentSiteId = "9fa57ccf-89a3-4f44-bae2-625cb3a6c317";
 let currentZones = [];
@@ -708,31 +756,28 @@ if (chatForm) {
     const query = chatInput.value.trim();
     if (!query) return;
 
+    const submitBtn = chatForm.querySelector('button[type="submit"]');
     appendUserMessage(query);
     chatInput.value = "";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
+    }
 
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        appendAssistantMessage(data);
-      } else {
-        appendAssistantMessage({
-          headline: "Operational Status",
-          summary: "Classroom 4B air filtration is operating within nominal boundaries. Indoor PM2.5 remains ~35% lower than Mumbai coastal ambient air.",
-          disclaimer: "Operational guidance grounded in St. Xavier's sensor telemetry."
-        });
-      }
+      const data = await sendChat(query);
+      appendAssistantMessage(data);
     } catch (err) {
       appendAssistantMessage({
-        headline: "Operational Status",
-        summary: "Classroom 4B air filtration is operating within normal boundaries. Indoor PM2.5 remains 35% lower than Mumbai coastal ambient air.",
-        disclaimer: "Operational guidance grounded in St. Xavier's sensor telemetry."
+        headline: "Unable to Reach Assistant",
+        summary: err.message || "Network or server error occurred.",
+        disclaimer: "Please try again or use the Sync button."
       });
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Send";
+      }
     }
   });
 }
