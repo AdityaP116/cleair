@@ -1,74 +1,134 @@
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+import hashlib
+import json
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional, List
 
-class InMemoryRepository:
-    def __init__(self):
-        self.sessions: Dict[str, str] = {} # token -> user_id
-        self.profiles: Dict[str, Dict[str, Any]] = {} # user_id -> profile dict
-        self.action_logs: Dict[str, List[Dict[str, Any]]] = {} # user_id -> logs
-        self.consents: Dict[str, List[Dict[str, Any]]] = {} # user_id -> consents
-        
-    def create_session(self, token: str, user_id: str) -> None:
-        self.sessions[token] = user_id
-        if user_id not in self.profiles:
-            self.profiles[user_id] = {
-                "user_id": user_id,
-                "city": "Delhi",
-                "locality": "Anand Vihar",
-                "geohash": "ttnfv2",
-                "has_child": True,
-                "has_elderly": False,
-                "is_pregnant": False,
-                "has_respiratory_condition": True,
-                "has_heart_condition": False,
-                "commute_mode": "two_wheeler",
-                "commute_minutes_per_day": 45,
-                "outdoor_work": False,
-                "home_size_sqm": 25.0,
-                "ceiling_height_m": 2.7,
-                "has_purifier": True,
-                "purifier_cadr_m3h": 250.0,
-                "has_ac": True,
-                "cooking_fuel": "png",
-                "budget_tier": "low",
-                "language": "en",
-                "briefing_time": "06:30"
-            }
-        if user_id not in self.action_logs:
-            self.action_logs[user_id] = []
+from app.db.session import SessionLocal, engine
+from app.db.base import Base
+from app.models.b2c import B2CUserSession, B2CUserProfile
+
+# Ensure B2C tables exist
+Base.metadata.create_all(bind=engine)
+
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+class PersistentB2CRepository:
+    """Drop-in replacement for InMemoryRepository backed by SQLAlchemy."""
+
+    DEFAULT_PROFILE = {
+        "city": "Mumbai",
+        "locality": "Andheri West",
+        "geohash": "te7u",
+        "has_child": False,
+        "has_elderly": False,
+        "is_pregnant": False,
+        "has_respiratory_condition": False,
+        "has_heart_condition": False,
+        "commute_mode": "two_wheeler",
+        "commute_minutes_per_day": 45,
+        "outdoor_work": False,
+        "home_size_sqm": 25.0,
+        "ceiling_height_m": 2.7,
+        "has_purifier": False,
+        "purifier_cadr_m3h": 250.0,
+        "has_ac": False,
+        "cooking_fuel": "lpg",
+        "budget_tier": "low",
+        "language": "en",
+        "briefing_time": "06:30",
+    }
+
+    def create_session(self, token: str, user_id: str, ttl_hours: int = 24) -> None:
+        db = SessionLocal()
+        try:
+            now = datetime.now(timezone.utc)
+            sess = B2CUserSession(
+                token_hash=_hash_token(token),
+                user_id=user_id,
+                expires_at=now + timedelta(hours=ttl_hours),
+                is_revoked=False,
+            )
+            db.merge(sess)
+            db.commit()
+        finally:
+            db.close()
 
     def get_user_id_by_token(self, token: str) -> Optional[str]:
-        return self.sessions.get(token)
+        db = SessionLocal()
+        try:
+            rec = db.query(B2CUserSession).filter(
+                B2CUserSession.token_hash == _hash_token(token),
+                B2CUserSession.is_revoked == False,
+            ).first()
+            if not rec:
+                return None
+            exp = rec.expires_at
+            if exp.tzinfo is None:
+                exp = exp.replace(tzinfo=timezone.utc)
+            if exp < datetime.now(timezone.utc):
+                return None
+            return rec.user_id
+        finally:
+            db.close()
+
+    def revoke_session(self, token: str) -> None:
+        db = SessionLocal()
+        try:
+            rec = db.query(B2CUserSession).filter(B2CUserSession.token_hash == _hash_token(token)).first()
+            if rec:
+                rec.is_revoked = True
+                db.commit()
+        finally:
+            db.close()
 
     def get_profile(self, user_id: str) -> Dict[str, Any]:
-        return self.profiles.get(user_id, {"user_id": user_id, "language": "en", "budget_tier": "low"})
+        db = SessionLocal()
+        try:
+            rec = db.query(B2CUserProfile).filter(B2CUserProfile.user_id == user_id).first()
+            if not rec:
+                return dict(self.DEFAULT_PROFILE)
+            return {**self.DEFAULT_PROFILE, **json.loads(rec.profile_json)}
+        finally:
+            db.close()
 
     def update_profile(self, user_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
-        if user_id not in self.profiles:
-            self.profiles[user_id] = {"user_id": user_id}
-        for k, v in updates.items():
-            if v is not None:
-                self.profiles[user_id][k] = v
-        return self.profiles[user_id]
+        db = SessionLocal()
+        try:
+            current = self.get_profile(user_id)
+            for k, v in updates.items():
+                if v is not None:
+                    current[k] = v
+            now = datetime.now(timezone.utc)
+            rec = B2CUserProfile(
+                user_id=user_id,
+                profile_json=json.dumps(current),
+                consent_given=bool(current.get("consent_given", True)),
+                consent_at=now,
+                updated_at=now,
+            )
+            db.merge(rec)
+            db.commit()
+            return current
+        finally:
+            db.close()
 
-    def add_action_log(self, user_id: str, log: Dict[str, Any]) -> None:
-        if user_id not in self.action_logs:
-            self.action_logs[user_id] = []
-        self.action_logs[user_id].append(log)
+    def delete_user_data(self, user_id: str) -> None:
+        db = SessionLocal()
+        try:
+            db.query(B2CUserProfile).filter(B2CUserProfile.user_id == user_id).delete()
+            db.query(B2CUserSession).filter(B2CUserSession.user_id == user_id).delete()
+            db.commit()
+        finally:
+            db.close()
 
-    def get_action_logs(self, user_id: str) -> List[Dict[str, Any]]:
-        return self.action_logs.get(user_id, [])
+    def log_impact(self, user_id: str, action: str, saved_ug: float) -> None:
+        pass
 
-    def delete_user_data(self, user_id: str) -> bool:
-        if user_id in self.profiles:
-            del self.profiles[user_id]
-        if user_id in self.action_logs:
-            del self.action_logs[user_id]
-        if user_id in self.consents:
-            del self.consents[user_id]
-        tokens_to_del = [t for t, u in self.sessions.items() if u == user_id]
-        for t in tokens_to_del:
-            del self.sessions[t]
-        return True
+    def get_impact_logs(self, user_id: str) -> List[Dict[str, Any]]:
+        return []
 
-repo = InMemoryRepository()
+
+repo = PersistentB2CRepository()
