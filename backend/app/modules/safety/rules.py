@@ -3,12 +3,13 @@ from pathlib import Path
 import yaml
 import re
 
-RULES_CONFIG_PATH = Path(__file__).resolve().parents[4] / "apps" / "api" / "app" / "config" / "rules.yaml"
+RULES_CONFIG_PATH = Path(__file__).resolve().parent / "rules.yaml"
 
 class SafetyRuleEngine:
     def __init__(self, config_path: Path = RULES_CONFIG_PATH):
         if not config_path.exists():
-            # Fallback path if run from root
+            config_path = Path(__file__).resolve().parents[4] / "apps" / "api" / "app" / "config" / "rules.yaml"
+        if not config_path.exists():
             config_path = Path("apps/api/app/config/rules.yaml")
         with open(config_path, "r", encoding="utf-8") as f:
             self.config = yaml.safe_load(f)
