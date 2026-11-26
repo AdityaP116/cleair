@@ -915,5 +915,35 @@ if (contactForm) {
   });
 }
 
+// Landing Page <-> Dashboard Toggle
+window.enterDashboard = function() {
+  const lp = document.getElementById("landingPage");
+  const ds = document.getElementById("dashboardShell");
+  if (lp) lp.classList.add("hidden");
+  if (ds) ds.classList.remove("hidden");
+  window.scrollTo(0, 0);
+};
+
+const landingCityForm = document.getElementById("landingCityForm");
+if (landingCityForm) {
+  landingCityForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const [lat, lon] = document.getElementById("landingCitySelect").value.split(",");
+    const btn = document.getElementById("btnLandingCheck");
+    if (btn) { btn.disabled = true; btn.textContent = "Checking..."; }
+    try {
+      const res = await fetch(`${API_BASE}/air/current?lat=${lat}&lon=${lon}`);
+      const air = await res.json();
+      document.getElementById("landingPreviewCity").textContent = air.location?.city || "Your Area";
+      document.getElementById("landingPreviewAqi").textContent = `AQI ${air.aqi} · ${air.category}`;
+      document.getElementById("landingPreviewMeta").textContent = `PM2.5: ${air.pm25} µg/m³ · Source: ${air.source}`;
+    } catch (err) {
+      document.getElementById("landingPreviewMeta").textContent = "Could not reach live data.";
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Check Live AQI"; }
+    }
+  });
+}
+
 // Start on DOM ready
 window.addEventListener("DOMContentLoaded", initializeDashboard);

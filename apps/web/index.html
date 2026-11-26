@@ -73,6 +73,87 @@
   </style>
 </head>
 <body class="bg-light-surface-variant text-text-primary antialiased selection:bg-mint-green/30 selection:text-text-primary min-h-screen">
+  <!-- ================= LANDING PAGE (#landingPage) ================= -->
+  <section id="landingPage" class="min-h-screen flex flex-col justify-between">
+    <header class="h-16 bg-light-surface border-b border-border-subtle px-6 lg:px-12 flex items-center justify-between sticky top-0 z-30">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-deep-teal text-mint-green flex items-center justify-center shadow-xs">
+          <span class="material-symbols-outlined text-[20px]">air</span>
+        </div>
+        <div>
+          <span class="font-headline text-lg font-bold tracking-tight text-text-primary">Cleair</span>
+          <span class="font-mono text-[10px] text-text-secondary uppercase tracking-wider block -mt-1">Breathe Smarter</span>
+        </div>
+      </div>
+      <button type="button" onclick="enterDashboard()" class="px-4 py-2 rounded-md bg-deep-teal text-white text-xs font-semibold hover:opacity-95 transition-opacity flex items-center gap-1.5">
+        <span>Open Dashboard</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </header>
+
+    <div class="max-w-6xl mx-auto w-full px-6 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-7 space-y-5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-teal-50 text-mint-dark border border-teal-200">
+          <span class="w-2 h-2 rounded-full bg-mint-green"></span>
+          Urban Air Quality &amp; Institutional Intelligence
+        </span>
+        <h1 class="font-headline text-4xl sm:text-5xl font-extrabold text-text-primary tracking-tight leading-tight">
+          Smog is bad today. Here is what your family &amp; campus should actually do.
+        </h1>
+        <p class="text-base text-text-secondary leading-relaxed max-w-2xl">
+          Live local AQI, honest indoor air hacks, and commute protection tailored to your location—backed by CPCB math and institutional monitoring.
+        </p>
+
+        <form id="landingCityForm" class="flex flex-wrap gap-3 pt-2">
+          <select id="landingCitySelect" class="rounded-md border-border-subtle bg-light-surface text-sm px-3 py-2.5 text-text-primary">
+            <option value="19.0760,72.8777">Mumbai (Andheri / Bandra)</option>
+            <option value="19.2183,72.9781">Thane</option>
+            <option value="28.6139,77.2090">Delhi-NCR</option>
+            <option value="18.5204,73.8567">Pune</option>
+            <option value="22.5726,88.3639">Kolkata</option>
+            <option value="12.9716,77.5946">Bengaluru</option>
+          </select>
+          <button type="submit" id="btnLandingCheck" class="px-5 py-2.5 rounded-md bg-deep-teal text-white text-sm font-semibold hover:opacity-95 transition-opacity">
+            Check Live AQI
+          </button>
+          <button type="button" onclick="enterDashboard()" class="px-5 py-2.5 rounded-md bg-light-surface border border-border-subtle text-text-primary text-sm font-semibold hover:bg-border-subtle/40 transition-colors">
+            Enter Operations Dashboard →
+          </button>
+        </form>
+      </div>
+
+      <!-- Live Bulletin Preview -->
+      <div class="lg:col-span-5 bg-light-surface rounded-xl p-6 border border-border-subtle shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="font-mono text-xs uppercase text-text-secondary" id="landingPreviewCity">Mumbai</span>
+          <span class="px-2.5 py-1 rounded-full text-xs font-mono bg-amber-50 text-amber-900 border border-amber-200" id="landingPreviewAqi">AQI --</span>
+        </div>
+        <p class="text-xs text-text-secondary" id="landingPreviewMeta">Click "Check Live AQI" to fetch real-time Open-Meteo / CPCB data.</p>
+        <div class="space-y-2 pt-2 border-t border-border-subtle text-xs text-text-secondary">
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-mint-dark text-[18px]">check_circle</span>
+            <span><strong class="text-text-primary">Daily Routine:</strong> Time outdoor activity for midday mixing (1:00–4:00 PM).</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-mint-dark text-[18px]">mode_fan</span>
+            <span><strong class="text-text-primary">Indoor Hack:</strong> Seal windows during traffic peaks; wet-mop instead of dry sweeping.</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-mint-dark text-[18px]">masks</span>
+            <span><strong class="text-text-primary">Commute:</strong> Use N95/FFP2 masks on high-AQI arterial roads.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="border-t border-border-subtle bg-light-surface py-5 px-6 lg:px-12 text-xs text-text-secondary flex flex-wrap justify-between gap-2">
+      <span>Cleair — Built for Indian cities · Open-Meteo &amp; CPCB NAQI breakpoints</span>
+      <span>General guidance, not medical advice · Emergency: <strong>112</strong></span>
+    </footer>
+  </section>
+
+  <!-- ================= DASHBOARD SHELL (#dashboardShell) ================= -->
+  <div id="dashboardShell" class="hidden">
   <div id="sidebarOverlay" class="fixed inset-0 bg-deep-teal/40 backdrop-blur-xs z-40 hidden"></div>
 
   <div class="flex min-h-screen">
@@ -608,6 +689,7 @@
 
       </div>
     </main>
+  </div>
   </div>
 
   <script src="/app.js"></script>
