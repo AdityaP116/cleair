@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     DATABASE_URL: Optional[str] = None
     REDIS_URL: Optional[str] = None
 
+    # Contact Form SMTP (optional, configured via .env)
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASS: Optional[str] = None
+    CONTACT_RECIPIENT_EMAIL: Optional[str] = None
+    SITE_BASE_URL: str = "http://127.0.0.1:8000"
+
     class Config:
         env_file = ".env"
         extra = "allow"

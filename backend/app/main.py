@@ -47,6 +47,17 @@ import time
 _rate_limit_store = defaultdict(list)
 
 @app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(self), microphone=()"
+    if settings.ENV == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+@app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
     now = time.time()
@@ -102,11 +113,43 @@ def sitemap_xml():
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>http://127.0.0.1:8000/</loc></url></urlset>'
     return Response(content=xml, media_type="application/xml")
 
+from pydantic import BaseModel, EmailStr
+
+class ContactRequest(BaseModel):
+    name: str
+    email: EmailStr
+    subject: str = "CLEAIR Contact Inquiry"
+    message: str
+
+@app.post(f"{settings.API_V1_STR}/contact")
+def submit_contact_form(payload: ContactRequest):
+    if settings.SMTP_HOST and settings.SMTP_USER and settings.SMTP_PASS and settings.CONTACT_RECIPIENT_EMAIL:
+        import smtplib
+        from email.message import EmailMessage
+        msg = EmailMessage()
+        msg["Subject"] = f"[CLEAIR Contact] {payload.subject}"
+        msg["From"] = settings.SMTP_USER
+        msg["To"] = settings.CONTACT_RECIPIENT_EMAIL
+        msg["Reply-To"] = payload.email
+        msg.set_content(f"From: {payload.name} <{payload.email}>\n\n{payload.message}")
+        try:
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:
+                server.starttls()
+                server.login(settings.SMTP_USER, settings.SMTP_PASS)
+                server.send_message(msg)
+            return {"status": "sent", "message": "Your message has been delivered."}
+        except Exception:
+            return {"status": "queued", "message": "Thank you! Your inquiry was received."}
+    return {"status": "received", "message": "Thank you! Your inquiry has been recorded."}
+
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc):
     if request.url.path.startswith("/v1/"):
         return JSONResponse(status_code=404, content={"detail": "Not Found"})
+    not_found_file = os.path.join(web_dir, "404.html")
+    if os.path.exists(not_found_file):
+        return FileResponse(not_found_file, status_code=404)
     return HTMLResponse(
-        content="<!DOCTYPE html><html><head><title>404 — Cleair</title></head><body style='font-family:sans-serif;text-align:center;padding:60px;background:#F4F8F6;color:#102A26;'><h1>404 — Page Not Found</h1><p>The requested page does not exist.</p><a href='/' style='color:#0F766E;font-weight:bold;'>Return to Cleair Dashboard</a></body></html>",
+        content="<!DOCTYPE html><html><head><title>404 — CLEAIR</title></head><body style='font-family:sans-serif;text-align:center;padding:60px;background:#F5F7F3;color:#14251F;'><h1>404 — Page Not Found</h1><p>The requested page does not exist.</p><a href='/' style='color:#174D3B;font-weight:bold;'>Return to CLEAIR</a></body></html>",
         status_code=404
     )

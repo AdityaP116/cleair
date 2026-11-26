@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14251F"/>
+      <stop offset="100%" stop-color="#174D3B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1020" cy="140" r="220" fill="#159F8C" fill-opacity="0.18"/>
+  <circle cx="180" cy="520" r="180" fill="#DDF4EA" fill-opacity="0.08"/>
+  <rect x="80" y="96" width="72" height="72" rx="16" fill="#DDF4EA"/>
+  <path d="M96 124h30a7 7 0 1 0-7-7M96 136h40M96 148h22a6 6 0 1 1-6 6" stroke="#174D3B" stroke-width="5" stroke-linecap="round"/>
+  <text x="176" y="146" fill="#DDF4EA" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="42" font-weight="800">CLEAIR</text>
+  <text x="80" y="275" fill="#FFFFFF" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="64" font-weight="800">Clearer Air. Smarter Living.</text>
+  <text x="80" y="345" fill="#DDF4EA" font-family="Inter, sans-serif" font-size="28" font-weight="400">AI-powered environmental intelligence for families, communities &amp; institutions.</text>
+  <rect x="80" y="420" width="320" height="56" rx="12" fill="#159F8C"/>
+  <text x="118" y="457" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="22" font-weight="700">DISCOVER • ACT • MEASURE</text>
+</svg>

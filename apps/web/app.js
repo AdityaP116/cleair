@@ -199,4 +199,79 @@ document.getElementById("btnDeleteProfile")?.addEventListener("click", async () 
   document.getElementById("settingsMsg").textContent = "Profile and session deleted.";
 });
 
-window.addEventListener("DOMContentLoaded", route);
+// ================= TOASTS, ANALYTICS, COOKIE CONSENT & SEO =================
+export function showToast(message, type = "success") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span>${message}</span>`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+export function trackEvent(eventName, detail = {}) {
+  try {
+    const prefs = JSON.parse(localStorage.getItem("cleair_cookie_prefs") || "{}");
+    if (prefs.analytics === false) return;
+    const events = JSON.parse(localStorage.getItem("cleair_events") || "[]");
+    events.push({ event: eventName, detail, ts: new Date().toISOString() });
+    localStorage.setItem("cleair_events", JSON.stringify(events.slice(-50)));
+  } catch (_) {}
+}
+
+function initCookieConsent() {
+  const banner = document.getElementById("cookieBanner");
+  const modal = document.getElementById("cookieModal");
+  if (!banner || !modal) return;
+  if (!localStorage.getItem("cleair_cookie_prefs")) {
+    banner.classList.remove("hidden");
+  }
+  const savePrefs = (analytics, personalization) => {
+    localStorage.setItem("cleair_cookie_prefs", JSON.stringify({ essential: true, analytics, personalization }));
+    banner.classList.add("hidden");
+    modal.classList.add("hidden");
+    showToast("Privacy preferences saved.");
+  };
+  document.getElementById("btnCookieAccept")?.addEventListener("click", () => savePrefs(true, true));
+  document.getElementById("btnCookieEssential")?.addEventListener("click", () => savePrefs(false, false));
+  document.getElementById("btnCookiePrefs")?.addEventListener("click", () => modal.classList.remove("hidden"));
+  document.getElementById("btnCookieSave")?.addEventListener("click", () => {
+    const a = document.getElementById("prefAnalytics")?.checked ?? true;
+    const p = document.getElementById("prefPersonalization")?.checked ?? true;
+    savePrefs(a, p);
+  });
+}
+
+const ROUTE_META = {
+  "#/": ["CLEAIR — Clearer Air. Smarter Living.", "CLEAIR turns environmental data into personalized decisions for your home, routine, and community."],
+  "#/onboarding": ["Onboarding — CLEAIR", "Personalize your household air-quality profile in 5 quick steps."],
+  "#/dashboard": ["Dashboard — CLEAIR", "Live local AQI, pollutant breakdown, and personalized daily guidance."],
+  "#/dashboard/intelligence": ["Air Quality Intelligence — CLEAIR", "Hourly air-quality forecasts and pollutant trends."],
+  "#/dashboard/assistant": ["AI Environmental Assistant — CLEAIR", "Ask CLEAIR AI for tailored air-quality and health guidance."],
+  "#/dashboard/routines": ["Daily Routines — CLEAIR", "Low-emission daily routines and commute planning."],
+  "#/dashboard/indoor": ["Indoor Air — CLEAIR", "Practical indoor air quality recommendations."],
+  "#/dashboard/planner": ["Daily Planner — CLEAIR", "Plan your day around cleaner air windows."],
+  "#/dashboard/impact": ["Sustainability Calculator — CLEAIR", "Measure completed actions and estimated impact."],
+  "#/dashboard/community": ["Community Insights — CLEAIR", "Local community air-quality observations."],
+  "#/dashboard/settings": ["Settings & Privacy — CLEAIR", "Manage your CLEAIR profile, data, and privacy."],
+};
+
+function updateRouteSEO() {
+  const hash = window.location.hash || "#/";
+  const [title, desc] = ROUTE_META[hash] || ROUTE_META["#/"];
+  document.title = title;
+  document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
+  document.getElementById("ogTitle")?.setAttribute("content", title);
+  document.getElementById("ogDescription")?.setAttribute("content", desc);
+  const url = `${window.location.origin}/${hash === "#/" ? "" : hash}`;
+  document.getElementById("canonicalLink")?.setAttribute("href", url);
+  document.getElementById("ogUrl")?.setAttribute("content", url);
+}
+
+window.addEventListener("hashchange", updateRouteSEO);
+window.addEventListener("DOMContentLoaded", () => {
+  route();
+  initCookieConsent();
+  updateRouteSEO();
+});

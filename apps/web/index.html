@@ -6,9 +6,37 @@
   <title>CLEAIR — Clearer Air. Smarter Living.</title>
   <meta name="description" content="CLEAIR turns environmental data into personalized decisions for your home, routine, and community.">
   <meta name="theme-color" content="#174D3B">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="apple-touch-icon" href="/static/favicon.svg">
+  <link rel="canonical" id="canonicalLink" href="https://cleair.app/">
+  <!-- Open Graph & Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="CLEAIR — Clearer Air. Smarter Living.">
+  <meta property="og:description" id="ogDescription" content="CLEAIR turns environmental data into personalized decisions for your home, routine, and community.">
+  <meta property="og:url" id="ogUrl" content="https://cleair.app/">
+  <meta property="og:image" content="/static/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CLEAIR — Clearer Air. Smarter Living.">
+  <meta name="twitter:description" content="AI-powered environmental intelligence for families, communities, and institutions.">
+  <meta name="twitter:image" content="/static/og-image.svg">
+  <!-- Font Optimization -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json" id="schemaOrgData">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CLEAIR",
+    "alternateName": "Clearer Air. Smarter Living.",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web",
+    "description": "AI-powered environmental intelligence platform for individuals, families, communities, and institutions."
+  }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <script>
     tailwind.config = {
@@ -333,6 +361,41 @@
         <span>CLEAIR — Clearer Air. Smarter Living. · Open-Meteo &amp; CPCB NAQI</span>
         <span>General guidance, not medical advice · Breathing emergency: <strong>112</strong></span>
       </footer>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" role="status" aria-live="polite"></div>
+
+  <!-- Cookie Consent Banner -->
+  <aside id="cookieBanner" class="card hidden" role="dialog" aria-label="Cookie preferences">
+    <strong style="display: block; margin-bottom: 4px;">Privacy &amp; Cookie Preferences</strong>
+    <p style="font-size: 0.8125rem; color: var(--color-text-secondary); margin: 0 0 12px;">
+      CLEAIR uses essential storage for your session and optional analytics to improve air-quality guidance.
+    </p>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <button id="btnCookieAccept" type="button" class="btn btn-primary" style="min-height: 36px; padding: 6px 12px;">Accept All</button>
+      <button id="btnCookieEssential" type="button" class="btn btn-secondary" style="min-height: 36px; padding: 6px 12px;">Essential Only</button>
+      <button id="btnCookiePrefs" type="button" class="btn btn-secondary" style="min-height: 36px; padding: 6px 12px;">Preferences</button>
+    </div>
+  </aside>
+
+  <!-- Cookie Preferences Modal -->
+  <div id="cookieModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 65; display: flex; align-items: center; justify-content: center; padding: 16px;">
+    <div class="card" style="max-width: 420px; width: 100%; display: grid; gap: 12px;">
+      <h2 style="margin: 0; font-size: 1.1rem;">Cookie Preferences</h2>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem;">
+        <input type="checkbox" checked disabled> <span><strong>Essential</strong> (Session &amp; security)</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem;">
+        <input type="checkbox" id="prefAnalytics" checked> <span><strong>Analytics</strong> (Conversion &amp; usage events)</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem;">
+        <input type="checkbox" id="prefPersonalization" checked> <span><strong>Personalization</strong> (Saved city &amp; theme)</span>
+      </label>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+        <button id="btnCookieSave" type="button" class="btn btn-primary" style="min-height: 36px; padding: 6px 14px;">Save Preferences</button>
+      </div>
     </div>
   </div>
 
