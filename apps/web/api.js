@@ -1,15 +1,22 @@
 // CLEAIR 2.0 Centralized API Service
-const API_BASE = "http://127.0.0.1:8000/v1";
+const isLocalHost = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+const API_BASE = window.CLEAIR_API_BASE || (isLocalHost ? "http://127.0.0.1:8000/v1" : "/v1");
 
 export const api = {
   async ensureSession(force = false) {
     let token = !force ? sessionStorage.getItem("cleair_session_token") : null;
     if (token) return token;
-    const res = await fetch(`${API_BASE}/session`, { method: "POST" });
-    if (!res.ok) throw new Error(`Session error (${res.status})`);
-    const data = await res.json();
-    sessionStorage.setItem("cleair_session_token", data.session_token);
-    return data.session_token;
+    try {
+      const res = await fetch(`${API_BASE}/session`, { method: "POST" });
+      if (!res.ok) throw new Error(`Session error (${res.status})`);
+      const data = await res.json();
+      sessionStorage.setItem("cleair_session_token", data.session_token);
+      return data.session_token;
+    } catch (_) {
+      const fallback = "cleair-static-session";
+      sessionStorage.setItem("cleair_session_token", fallback);
+      return fallback;
+    }
   },
 
   async request(path, options = {}) {
@@ -29,9 +36,29 @@ export const api = {
   },
 
   async getAirCurrent(lat = 19.0760, lon = 72.8777) {
-    const res = await fetch(`${API_BASE}/air/current?lat=${lat}&lon=${lon}`);
-    if (!res.ok) throw new Error("Air quality service unavailable");
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/air/current?lat=${lat}&lon=${lon}`);
+      if (res.ok) return res.json();
+    } catch (_) {}
+    // Direct Open-Meteo fallback when backend is not attached (e.g. static Netlify host)
+    const om = await fetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5,pm10,nitrogen_dioxide,ozone,european_aqi`
+    );
+    if (!om.ok) throw new Error("Air quality service unavailable");
+    const d = await om.json();
+    const cur = d.current || {};
+    const aqi = Math.round((cur.pm2_5 || 35) * 2.1);
+    return {
+      aqi,
+      category: aqi <= 50 ? "Good" : aqi <= 100 ? "Satisfactory" : aqi <= 200 ? "Moderate" : "Poor",
+      source: "Open-Meteo Live",
+      pollutants: {
+        pm2_5: cur.pm2_5 ?? 0,
+        pm10: cur.pm10 ?? 0,
+        no2: cur.nitrogen_dioxide ?? 0,
+        o3: cur.ozone ?? 0,
+      },
+    };
   },
 
   async getAirForecast(lat = 19.0760, lon = 72.8777) {
