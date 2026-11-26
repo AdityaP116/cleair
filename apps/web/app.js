@@ -784,24 +784,55 @@ if (chatForm) {
 
 function appendUserMessage(text) {
   const row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.justifyContent = "flex-end";
-  row.innerHTML = `<div style="background: var(--accent-primary-subtle); color: var(--accent-primary); border: 1px solid var(--accent-primary); border-radius: var(--radius-md); padding: 10px 14px; max-width: 80%; font-size: 13px;">${escapeHtml(text)}</div>`;
+  row.className = "flex justify-end";
+  row.innerHTML = `<div class="bg-deep-teal text-white rounded-lg px-3.5 py-2.5 max-w-[80%] text-xs shadow-2xs">${escapeHtml(text)}</div>`;
   chatMessages.appendChild(row);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function appendAssistantMessage(data) {
   const row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.gap = "10px";
-  row.style.fontSize = "13px";
+  row.className = "flex gap-3 text-xs";
+
+  const renderList = (title, items) => {
+    if (!items || !items.length) return "";
+    return `
+      <div class="mt-2 pt-2 border-t border-border-subtle">
+        <div class="font-mono text-[10px] uppercase font-semibold text-text-secondary mb-1">${escapeHtml(title)}</div>
+        <ul class="space-y-1 list-disc pl-4 text-text-secondary">
+          ${items.map(i => `<li><strong class="text-text-primary">${escapeHtml(i.title || '')}:</strong> ${escapeHtml(i.detail || '')}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  };
+
+  const renderImpacts = (impacts) => {
+    if (!impacts || !impacts.length) return "";
+    return `
+      <div class="mt-2 pt-2 border-t border-border-subtle">
+        <div class="font-mono text-[10px] uppercase font-semibold text-mint-dark mb-1">Quantified Impact</div>
+        <ul class="space-y-1 text-text-secondary">
+          ${impacts.map(i => `<li>• ${escapeHtml(i.plain_explanation || '')} <span class="text-[10px] text-text-secondary/70">(${escapeHtml(i.assumptions || '')})</span></li>`).join("")}
+        </ul>
+      </div>
+    `;
+  };
+
+  const sourceTag = data.generated_by === "llm" ? "AI Grounded" : (data.generated_by === "guard" ? "Safety Guard" : "Rule Engine");
+
   row.innerHTML = `
-    <div style="width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--accent-primary-subtle); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0;">AI</div>
-    <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 14px; max-width: 80%; line-height: 1.5;">
-      <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${escapeHtml(data.headline || 'Operations Intelligence')}</div>
-      <p style="margin: 0 0 6px; color: var(--text-secondary);">${escapeHtml(data.summary || '')}</p>
-      <div style="font-size: 10px; color: var(--text-muted); font-style: italic;">${escapeHtml(data.disclaimer || '')}</div>
+    <div class="w-7 h-7 rounded-md bg-deep-teal text-mint-green flex items-center justify-center font-bold text-xs shrink-0">AI</div>
+    <div class="bg-light-surface-variant border border-border-subtle rounded-lg p-3.5 max-w-[85%] space-y-1.5">
+      <div class="flex items-center justify-between gap-2">
+        <span class="font-bold text-text-primary text-sm">${escapeHtml(data.headline || 'Operations Intelligence')}</span>
+        <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-teal-50 text-mint-dark border border-teal-200">${escapeHtml(sourceTag)}</span>
+      </div>
+      <p class="text-text-secondary leading-relaxed">${escapeHtml(data.summary || '')}</p>
+      ${renderList("Daily Routines", data.daily_routines)}
+      ${renderList("Indoor Air Hacks", data.indoor_hacks)}
+      ${renderList("Sustainable Alternatives", data.sustainable_alternatives)}
+      ${renderImpacts(data.impact_explanations)}
+      <div class="text-[10px] text-text-secondary/80 italic pt-1">${escapeHtml(data.disclaimer || '')}</div>
     </div>
   `;
   chatMessages.appendChild(row);
