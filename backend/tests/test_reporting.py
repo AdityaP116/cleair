@@ -145,11 +145,18 @@ def test_institutional_operations_summary_and_export(test_db):
     assert "PM2.5,45.0,µg/m³,VALID,MEASURED" in csv_out
 
     # 3. Test HTTP API Endpoints
-    res_sum = client.get(f"/v1/reports/site/{site.id}/summary?days=7")
+    from app.models.institutional import InstitutionalUser, InstitutionalMembership, RoleEnum
+    admin_id = str(uuid.uuid4())
+    test_db.add(InstitutionalUser(id=admin_id, email=f"{admin_id[:8]}@school.edu", full_name="Test Admin", password_hash="hashed", is_active=True))
+    test_db.add(InstitutionalMembership(id=str(uuid.uuid4()), user_id=admin_id, organization_id=org.id, role=RoleEnum.ADMIN, is_active=True))
+    test_db.commit()
+    headers = {"x-institutional-user-id": admin_id}
+
+    res_sum = client.get(f"/v1/reports/site/{site.id}/summary?days=7", headers=headers)
     assert res_sum.status_code == 200
     assert res_sum.json()["monitoring_coverage"]["coverage_percent"] == 50.0
 
-    res_csv = client.get(f"/v1/reports/site/{site.id}/export/csv?days=7")
+    res_csv = client.get(f"/v1/reports/site/{site.id}/export/csv?days=7", headers=headers)
     assert res_csv.status_code == 200
     assert "text/csv" in res_csv.headers["content-type"]
     assert "Timestamp_UTC" in res_csv.text

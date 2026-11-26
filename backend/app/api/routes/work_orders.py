@@ -5,6 +5,8 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 from app.db.session import get_db
+from app.core.rbac import require_institutional_role, verify_site_ownership, InstitutionalContext
+from app.models.institutional import RoleEnum
 from app.models.work_orders import WorkOrderStatus, WorkOrderPriority, InterventionType
 from app.modules.operations.work_orders import WorkOrderService
 
@@ -42,15 +44,14 @@ class RecordInterventionRequest(BaseModel):
     metadata_json: Optional[Dict[str, Any]] = None
 
 @router.post("", status_code=201)
-def create_work_order(req: CreateWorkOrderRequest, db: Session = Depends(get_db)):
+def create_work_order(
+    req: CreateWorkOrderRequest,
+    ctx: InstitutionalContext = Depends(require_institutional_role([RoleEnum.ADMIN, RoleEnum.FACILITY_STAFF])),
+    db: Session = Depends(get_db),
+):
+    verify_site_ownership(db, req.site_id, ctx.organization_id)
     service = WorkOrderService(db)
-    org_id = req.organization_id
-    if not org_id:
-        from app.models.institutional import Site
-        site = db.query(Site).filter(Site.id == req.site_id).first()
-        if not site:
-            raise HTTPException(status_code=404, detail="Site not found")
-        org_id = site.organization_id
+    org_id = ctx.organization_id
 
     wo = service.create_work_order(
         site_id=req.site_id,

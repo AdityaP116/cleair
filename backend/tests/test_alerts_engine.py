@@ -37,6 +37,13 @@ def test_alert_rule_creation_and_threshold_evaluation(test_db):
     _, _, z = repo.create_hierarchy_node(site.id, "Academic Block", 1, "Classroom 3A")
     sensor, secret_key = repo.register_sensor(z.id, serial_number=f"SN-ALERT-{str(uuid.uuid4())[:6]}")
 
+    from app.models.institutional import InstitutionalUser, InstitutionalMembership, RoleEnum
+    admin_id = str(uuid.uuid4())
+    test_db.add(InstitutionalUser(id=admin_id, email=f"{admin_id[:8]}@school.edu", full_name="Test Admin", password_hash="hashed", is_active=True))
+    test_db.add(InstitutionalMembership(id=str(uuid.uuid4()), user_id=admin_id, organization_id=org.id, role=RoleEnum.ADMIN, is_active=True))
+    test_db.commit()
+    headers = {"x-institutional-user-id": admin_id}
+
     # 1. Create AlertRule for High CO2 (> 1000 ppm)
     rule_payload = {
         "name": "Classroom Elevated CO2",
@@ -48,8 +55,8 @@ def test_alert_rule_creation_and_threshold_evaluation(test_db):
         "site_id": site.id,
         "rationale": "ASHRAE indoor ventilation standard"
     }
-    res_rule = client.post("/v1/alerts/rules", json=rule_payload)
-    assert res_rule.status_code == 200
+    res_rule = client.post("/v1/alerts/rules", json=rule_payload, headers=headers)
+    assert res_rule.status_code in (200, 201)
     rule_data = res_rule.json()
     rule_id = rule_data["id"]
 

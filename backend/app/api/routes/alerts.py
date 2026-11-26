@@ -4,6 +4,8 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 from app.db.session import get_db
+from app.core.rbac import require_institutional_role, verify_site_ownership, InstitutionalContext
+from app.models.institutional import RoleEnum
 from app.models.alerts import AlertRule, AlertSeverity
 from app.modules.alerts.engine import AlertEngineService
 from app.repositories.facilities import FacilityRepository
@@ -17,13 +19,17 @@ from app.schemas.alerts import (
 
 router = APIRouter()
 
-@router.post("/rules", response_model=AlertRuleResponse)
-def create_alert_rule(rule_in: AlertRuleCreate, db: Session = Depends(get_db)):
-    repo = FacilityRepository(db)
-    org = repo.get_or_create_pilot_organization()
+@router.post("/rules", response_model=AlertRuleResponse, status_code=201)
+def create_alert_rule(
+    rule_in: AlertRuleCreate,
+    ctx: InstitutionalContext = Depends(require_institutional_role([RoleEnum.ADMIN])),
+    db: Session = Depends(get_db),
+):
+    if rule_in.site_id:
+        verify_site_ownership(db, rule_in.site_id, ctx.organization_id)
 
     rule = AlertRule(
-        organization_id=org.id,
+        organization_id=ctx.organization_id,
         site_id=rule_in.site_id,
         name=rule_in.name,
         measurement_type=rule_in.measurement_type.upper(),

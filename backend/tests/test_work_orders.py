@@ -152,6 +152,13 @@ def test_work_order_api_endpoints(test_db):
     _, _, zone = repo.create_hierarchy_node(site.id, "West Block", 1, "Biology Lab")
     test_db.commit()
 
+    from app.models.institutional import InstitutionalUser, InstitutionalMembership, RoleEnum
+    admin_id = str(uuid.uuid4())
+    test_db.add(InstitutionalUser(id=admin_id, email=f"{admin_id[:8]}@school.edu", full_name="Test Admin", password_hash="hashed", is_active=True))
+    test_db.add(InstitutionalMembership(id=str(uuid.uuid4()), user_id=admin_id, organization_id=org.id, role=RoleEnum.ADMIN, is_active=True))
+    test_db.commit()
+    headers = {"x-institutional-user-id": admin_id}
+
     # 1. POST /v1/work-orders
     res = client.post("/v1/work-orders", json={
         "site_id": site.id,
@@ -161,14 +168,14 @@ def test_work_order_api_endpoints(test_db):
         "description": "Operating hours exceeded 2000h threshold.",
         "priority": "HIGH",
         "actor_name": "Senior Operator"
-    })
+    }, headers=headers)
     assert res.status_code == 201
     wo_data = res.json()
     wo_id = wo_data["id"]
     assert wo_data["status"] == "OPEN"
 
     # 2. GET /v1/work-orders/site/{site_id}
-    res_list = client.get(f"/v1/work-orders/site/{site.id}")
+    res_list = client.get(f"/v1/work-orders/site/{site.id}", headers=headers)
     assert res_list.status_code == 200
     orders = res_list.json()
     assert len(orders) >= 1
