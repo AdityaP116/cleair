@@ -96,9 +96,24 @@ export const api = {
   },
 
   async getAirForecast(lat = 19.0760, lon = 72.8777) {
-    const res = await fetch(`${API_BASE}/air/forecast?lat=${lat}&lon=${lon}`);
-    if (!res.ok) throw new Error("Forecast unavailable");
-    return res.json();
+    try {
+      const res = await fetch(`${API_BASE}/air/forecast?lat=${lat}&lon=${lon}`);
+      const ct = res.headers.get("content-type") || "";
+      if (res.ok && ct.includes("application/json")) return res.json();
+    } catch (_) {}
+    const om = await fetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm2_5&forecast_days=1`
+    );
+    if (!om.ok) throw new Error("Forecast unavailable");
+    const d = await om.json();
+    const times = d.hourly?.time || [];
+    const pm = d.hourly?.pm2_5 || [];
+    return {
+      points: times.slice(0, 6).map((t, idx) => {
+        const aqi = Math.round((pm[idx] || 35) * 2.1);
+        return { valid_at: t.slice(11, 16), aqi, aqi_category: aqi <= 50 ? "Good" : aqi <= 100 ? "Satisfactory" : "Moderate" };
+      }),
+    };
   },
 
   getProfile() { return this.request("/profile"); },
