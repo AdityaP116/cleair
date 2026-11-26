@@ -57,18 +57,55 @@ async def security_headers_middleware(request: Request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
+from collections import defaultdict
+import time
+import logging
+from app.core.redis_client import get_redis_client, check_redis_health
+from app.db.session import check_db_health
+
+_rl_logger = logging.getLogger("cleair.ratelimit")
+_rate_limit_store = defaultdict(list)
+
+def _extract_client_ip(request: Request) -> str:
+    direct_ip = request.client.host if request.client else "unknown"
+    if direct_ip in settings.TRUSTED_PROXIES:
+        xff = request.headers.get("x-forwarded-for")
+        if xff:
+            return xff.split(",")[0].strip()
+    return direct_ip
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _extract_client_ip(request)
+    limit = settings.RATE_LIMIT_MAX_REQUESTS
+    window_sec = settings.RATE_LIMIT_WINDOW_SEC
+    r = get_redis_client()
+    if r is not None:
+        try:
+            bucket = int(time.time() // window_sec)
+            key = f"rl:{client_ip}:{bucket}"
+            pipe = r.pipeline()
+            pipe.incr(key)
+            pipe.expire(key, window_sec + 1)
+            count, _ = pipe.execute()
+            if count > limit:
+                return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
+            return await call_next(request)
+        except Exception as exc:
+            _rl_logger.warning("Redis rate-limit error (%s); fail_open=%s", type(exc).__name__, settings.RATE_LIMIT_FAIL_OPEN)
+            if not settings.RATE_LIMIT_FAIL_OPEN:
+                return JSONResponse(status_code=503, content={"detail": "Rate limiter unavailable."})
+            return await call_next(request)
+
     now = time.time()
     window = _rate_limit_store[client_ip]
-    _rate_limit_store[client_ip] = [t for t in window if now - t < 60]
-    if len(_rate_limit_store[client_ip]) >= 120:
+    _rate_limit_store[client_ip] = [t for t in window if now - t < window_sec]
+    if len(_rate_limit_store[client_ip]) >= limit:
         return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
     _rate_limit_store[client_ip].append(now)
     return await call_next(request)
 
-# Health endpoint
+# Health & Readiness endpoints
 @app.get(f"{settings.API_V1_STR}/health")
 def health_check():
     return {
@@ -78,6 +115,14 @@ def health_check():
         "environment": settings.ENV,
         "pilot_region": "Mumbai Metropolitan Region (MMR)"
     }
+
+@app.get(f"{settings.API_V1_STR}/ready")
+def readiness_check():
+    db_ok = check_db_health()
+    redis_ok = check_redis_health() if settings.REDIS_URL else None
+    if not db_ok:
+        return JSONResponse(status_code=503, content={"status": "not_ready", "database": False, "redis": redis_ok})
+    return {"status": "ready", "database": True, "redis": redis_ok}
 
 # Register B2C and Core routes
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}", tags=["Auth & Sessions"])

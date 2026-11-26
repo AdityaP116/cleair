@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     # Caching & DB
     DATABASE_URL: Optional[str] = None
     REDIS_URL: Optional[str] = None
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+
+    # Rate Limiting
+    RATE_LIMIT_MAX_REQUESTS: int = 120
+    RATE_LIMIT_WINDOW_SEC: int = 60
+    RATE_LIMIT_FAIL_OPEN: bool = True
+    TRUSTED_PROXIES: List[str] = ["127.0.0.1"]
 
     # Contact Form SMTP (optional, configured via .env)
     SMTP_HOST: Optional[str] = None

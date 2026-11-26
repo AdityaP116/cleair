@@ -32,12 +32,47 @@ def _nearest_city(lat: float, lon: float) -> Tuple[Dict[str, Any], float]:
     return best, dist
 
 
+import json
+import logging
+from app.core.redis_client import get_redis_client
+
+_aq_logger = logging.getLogger("cleair.air_quality")
+
 class AirQualityService:
     OPEN_METEO_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
     CACHE_TTL_SEC = 900
 
     def __init__(self):
         self._cache: Dict[Tuple[float, float], Tuple[float, Dict[str, Any]]] = {}
+
+    def _cache_key(self, lat: float, lon: float) -> str:
+        return f"air_quality:v1:{round(lat, 4):.4f}:{round(lon, 4):.4f}"
+
+    def _get_cached(self, lat: float, lon: float) -> Optional[Dict[str, Any]]:
+        r = get_redis_client()
+        if r is not None:
+            try:
+                raw = r.get(self._cache_key(lat, lon))
+                if raw:
+                    return json.loads(raw)
+            except Exception as exc:
+                _aq_logger.warning("Redis cache get failed: %s", type(exc).__name__)
+        key = (round(lat, 3), round(lon, 3))
+        if key in self._cache:
+            ts, data = self._cache[key]
+            if time.time() - ts < self.CACHE_TTL_SEC:
+                return data
+        return None
+
+    def _set_cached(self, lat: float, lon: float, data: Dict[str, Any]) -> None:
+        r = get_redis_client()
+        if r is not None:
+            try:
+                r.setex(self._cache_key(lat, lon), self.CACHE_TTL_SEC, json.dumps(data))
+            except Exception as exc:
+                _aq_logger.warning("Redis cache set failed: %s", type(exc).__name__)
+        key = (round(lat, 3), round(lon, 3))
+        self._cache[key] = (time.time(), data)
 
     def _fetch_open_meteo(self, lat: float, lon: float) -> Optional[Dict[str, Any]]:
         params = {
@@ -63,10 +98,9 @@ class AirQualityService:
         now_utc = datetime.now(timezone.utc)
         nearest, dist_km = _nearest_city(lat, lon)
 
-        if key in self._cache:
-            cached_ts, cached_val = self._cache[key]
-            if now_ts - cached_ts < self.CACHE_TTL_SEC:
-                return {**cached_val, "age_minutes": round((now_ts - cached_ts) / 60.0, 1)}
+        cached_val = self._get_cached(lat, lon)
+        if cached_val is not None:
+            return cached_val
 
         curr = self._fetch_open_meteo(lat, lon)
         if curr and curr.get("pm2_5") is not None:
