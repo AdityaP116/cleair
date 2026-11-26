@@ -8,7 +8,8 @@ export const api = {
     if (token) return token;
     try {
       const res = await fetch(`${API_BASE}/session`, { method: "POST" });
-      if (!res.ok) throw new Error(`Session error (${res.status})`);
+      const ct = res.headers.get("content-type") || "";
+      if (!res.ok || !ct.includes("application/json")) throw new Error(`Session error (${res.status})`);
       const data = await res.json();
       sessionStorage.setItem("cleair_session_token", data.session_token);
       return data.session_token;
@@ -21,18 +22,51 @@ export const api = {
 
   async request(path, options = {}) {
     let token = await this.ensureSession(false);
+    if (token === "cleair-static-session") {
+      return this._staticFallback(path, options);
+    }
     const headers = { "Content-Type": "application/json", "x-session-token": token, ...(options.headers || {}) };
-    let res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-    if (res.status === 401) {
-      token = await this.ensureSession(true);
-      headers["x-session-token"] = token;
-      res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    try {
+      let res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      if (res.status === 401) {
+        token = await this.ensureSession(true);
+        if (token === "cleair-static-session") return this._staticFallback(path, options);
+        headers["x-session-token"] = token;
+        res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      }
+      const ct = res.headers.get("content-type") || "";
+      if (!res.ok || !ct.includes("application/json")) {
+        if (res.status === 404 || res.status === 405 || !ct.includes("application/json")) {
+          return this._staticFallback(path, options);
+        }
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Request failed (${res.status})`);
+      }
+      return res.json();
+    } catch (e) {
+      if (e.name === "TypeError") return this._staticFallback(path, options);
+      throw e;
     }
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || `Request failed (${res.status})`);
+  },
+
+  _staticFallback(path, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+    if (path.startsWith("/profile")) {
+      const saved = JSON.parse(localStorage.getItem("cleair_local_profile") || '{"city":"Mumbai","sensitivity":"standard","commute":"public_transit"}');
+      if (method === "PATCH") {
+        const updates = JSON.parse(options.body || "{}");
+        const next = { ...saved, ...updates };
+        localStorage.setItem("cleair_local_profile", JSON.stringify(next));
+        return next;
+      }
+      if (method === "DELETE") {
+        localStorage.removeItem("cleair_local_profile");
+        sessionStorage.removeItem("cleair_session_token");
+        return { status: "deleted" };
+      }
+      return saved;
     }
-    return res.json();
+    return { status: "ok", offline_mode: true };
   },
 
   async getAirCurrent(lat = 19.0760, lon = 72.8777) {
